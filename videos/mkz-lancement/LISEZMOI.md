@@ -1,8 +1,9 @@
 # MKZ Motors — film de lancement du dépôt-vente (20 s, 1920 × 1080)
 
 Film de motion design en 3D, sans voix, monté comme un « edit » sur une musique originale à 120 battements par minute.
-Fabriqué avec le kit Mavena « Lancement de produit » : même moteur et mêmes outils, avec une histoire, des dessins,
-des couleurs (le rouge MKZ) et une musique (mi mineur, mélodie, basse et rythme neufs) écrits pour MKZ Motors.
+Fabriqué avec le kit Mavena « Lancement de produit » : même moteur et mêmes outils, avec une histoire, des dessins et
+des couleurs (le rouge MKZ) écrits pour MKZ Motors. La musique est celle de la vidéo d'exemple du kit, à la demande
+de MKZ Motors (la notice du kit demande en principe d'en écrire une autre pour une autre vidéo : vérifier la licence).
 
 Le fil : une case du planning des essais. Elle naît des messages qui assaillent le particulier qui vend seul sa
 voiture, reçoit la réservation de l'essai, le rappel, puis le tampon « Vendu », se multiplie pour remplir la semaine,
@@ -30,7 +31,7 @@ des messages) : à remplacer par de vraies valeurs, ou à garder comme illustrat
 | `scene/cues.js` | Le conducteur : tous les instants, sur la grille de la musique. |
 | `scene/film.js` | La chorégraphie : les plans, déclarés dans l'ordre par `plan(coupe(instant), …)`. |
 | `scene/moteur.js` | Le moteur 3D du kit (boîtes de verre, sol laqué, lumières), non modifié. |
-| `tools/musique.mjs` | La musique originale et les bruitages. Si `PRISES` change, le recopier ici aussi. |
+| `tools/musique.mjs` | La musique (celle de l'exemple du kit, inchangée) et les bruitages. Si `PRISES` change, le recopier ici aussi. |
 | `scene/index.html`, `scene/apercu.html` | Final (2 passes par image, 3D en 960 × 540 agrandie en 1080p) et aperçu (1 passe). Sur un ordinateur avec carte graphique, mettre `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html` pour la qualité maximale du kit. |
 
 ## Fabriquer la vidéo

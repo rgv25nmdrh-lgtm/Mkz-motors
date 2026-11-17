@@ -1,15 +1,13 @@
-// La musique du film de lancement MKZ Motors : un morceau ORIGINAL, composé et synthétisé ici, dans le style des
-// montages rapides (« edits »). Les instruments viennent du kit « Lancement de produit » ; la tonalité (mi mineur),
-// la mélodie, la basse et le rythme sont écrits pour ce film.
+// La musique de la vidéo « Lancement de produit » : un morceau ORIGINAL, composé et synthétisé ici, dans le style
+// des montages rapides (« edits ») qui tournent sur TikTok.
 //   node tools/musique.mjs
 // Ce n'est la copie d'aucun titre : la mélodie, la basse et le rythme sont écrits dans ce fichier (et ne sont pas ceux
 // des autres vidéos, dont seuls les instruments sont repris). Les codes du genre : une montée étouffée, un arrêt net,
 // puis une chute où une grosse caisse dure marque chaque temps, une basse saturée qui galope entre les coups, une
 // mélodie de cloche qui tourne en boucle, des claquements secs.
 // 120 battements par minute : un temps dure 30 images à 60 i/s, une mesure 120 images, et 20 s font dix mesures.
-// La forme suit le script : mesures 1-2 le problème (le vendeur débordé : la montée, puis l'arrêt), 3 à 6 la chute,
-// qui ne lâche plus (MKZ prend le relais, l'essai réservé, le rappel, la vente), 7-8 la semaine pleine (tout passe au
-// double), 9-10 la signature.
+// La forme suit le script : mesures 1-2 le problème (la montée, puis l'arrêt), 3 à 6 la chute, qui ne lâche plus
+// (le basculement, réserver, rappeler, encaisser), 7-8 la semaine pleine (tout passe au double), 9-10 la signature.
 // Sorties : audio/musique.wav et .m4a (la musique seule), audio/mix.wav et .m4a (musique et bruitages),
 // audio/grille.json (les instants sur lesquels l'image est calée).
 import { writeFileSync, mkdirSync } from "node:fs";
@@ -20,19 +18,18 @@ import { SR, midi, dB, fromDb, secs, rng, Biquad, SVF, saw, Track, reverb, limit
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const BPM = 120, BEAT = 60 / BPM, S16 = BEAT / 4, BAR = BEAT * 4, D = 10 * BAR, TIERS = BEAT / 3;   // 20 s
-const TAU = 2 * Math.PI, N = rng(20261117), white = () => N() * 2 - 1;
+const TAU = 2 * Math.PI, N = rng(20261006), white = () => N() * 2 - 1;
 const CHUTE = 2 * BAR, DOUBLE = 6 * BAR, SORTIE = 8 * BAR, DERNIER = 9 * BAR;
 // L'arrêt net : le dernier temps de la mesure 2 (« tout se fige »), juste avant que la musique tombe.
 const ARRETS = [[CHUTE - BEAT, CHUTE]];
 
 // ------------------------------------------------------------------ ce qui est écrit ici : basse et mélodie
-// Mi mineur. La basse tient deux mesures sur mi, puis une sur do, une sur ré.
-const FONDAMENTALES = [40, 40, 36, 38];
-// La mélodie de cloche : un motif de deux mesures (pas dans la mesure en doubles croches, note MIDI). Une question qui
-// monte (mi, sol, la, si), puis une réponse qui redescend vers mi.
+// Fa dièse mineur. La basse tient deux mesures sur fa dièse, puis une sur ré, une sur mi.
+const FONDAMENTALES = [42, 42, 38, 40];
+// La mélodie de cloche : un motif de deux mesures (pas dans la mesure en doubles croches, note MIDI).
 const MOTIF = [
-  [[0, 76], [3, 79], [4, 81], [7, 83], [9, 81], [10, 79], [12, 83], [15, 86]],
-  [[0, 88], [2, 86], [4, 83], [7, 81], [8, 79], [11, 78], [12, 79], [14, 76]],
+  [[0, 78], [2, 81], [3, 80], [6, 78], [8, 85], [10, 83], [11, 81], [14, 80]],
+  [[0, 78], [2, 81], [3, 80], [6, 76], [8, 73], [10, 76], [12, 78], [15, 73]],
 ];
 // Les paiements de la semaine pleine (les mêmes instants que dans scene/film.js) : un jour par temps, quatre cases
 // en quadruples croches ; les trois cases du samedi une par demi-temps, la dernière sur le troisième temps de la mesure 8.
@@ -126,7 +123,7 @@ const nL = new Float32Array(mus.n), nR = new Float32Array(mus.n);
 
 // --- mesures 1 et 2 : le problème. La mélodie étouffée, loin dans l'écho ; un coup par action (trois messages, deux
 //     ratures), puis la rafale : un demi-temps, un triolet ; un roulement qui monte ; l'arrêt net sur le dernier temps.
-for (const m of [40, 47, 52]) nappe(nL, nR, midi(m), 0, ARRETS[0][0], 0.14);
+for (const m of [42, 49, 54]) nappe(nL, nR, midi(m), 0, ARRETS[0][0], 0.14);
 for (let bar = 0; bar < 2; bar++) cloches(bar, bar * BAR, { sourde: 1, octave: -12, gain: 0.26, echoGain: 0.4, jusque: bar ? 12 : 16 });
 mus.add(IMP, 0, 0.4); echo.add(IMP, 0, 0.2); coups.push(0);
 [[1, 0.6], [2, 0.6], [3, 0.7], [4, 0.8], [5, 0.85]].forEach(([b, g]) => coupSourd(b * BEAT, g));
@@ -140,14 +137,13 @@ function mesurePleine(bar, force, { jusque = 16 } = {}) {
   for (let step = 0; step < jusque; step++) {
     const t = t0 + step * S16, dans = step % 4;
     if (force === 3 ? step % 2 === 0 : dans === 0) coup(t, force === 3 && dans ? 0.8 : 1);
-    // la basse répond au coup : une double croche juste après lui, une autre à l'octave avant le suivant ; au double,
-    // sur chaque contretemps, avec une quinte au milieu de la demi-mesure
-    if (force < 3 && dans === 1) tb.add(basse(f, 0.115, { attaque: 0.3 }), t, 0.9);
-    if (force < 3 && dans === 3) tb.add(basse(f * 2, 0.11, { attaque: 0.2 }), t, 0.6);
-    if (force === 3 && step % 2 === 1) tb.add(basse(f * (step % 8 === 5 ? 1.5 : 1), 0.11, { attaque: 0.3 }), t, 0.95);
+    // la basse galope : deux doubles croches avant chaque coup, la seconde à l'octave ; au double, sur chaque contretemps
+    if (force < 3 && dans === 2) tb.add(basse(f, 0.115, { attaque: 0.3 }), t, 0.95);
+    if (force < 3 && dans === 3) tb.add(basse(f * 2, 0.11, { attaque: 0.2 }), t, 0.62);
+    if (force === 3 && step % 2 === 1) tb.add(basse(f * (step % 8 === 7 ? 1.5 : 1), 0.11, { attaque: 0.3 }), t, 0.95);
     if (step === 4 || step === 12) { mus.add(C1, t, 0.7); echo.add(C1, t, 0.22); }
-    if (step === 14 && bar % 2) mus.add(S1, t, 0.4, -0.2);            // une caisse claire fantôme avant la mesure suivante
-    if (force >= 2 && step === 10) mus.add(S1, t, 0.3, 0.2);
+    if (step === 15 && bar % 2) mus.add(S1, t, 0.4, -0.2);            // une caisse claire fantôme avant la mesure suivante
+    if (force >= 2 && step === 7) mus.add(S1, t, 0.3, 0.2);
     mus.add(H1, t, (dans === 2 ? 0.16 : 0.08) * (0.8 + 0.2 * force), step % 2 ? 0.35 : -0.35);
     if (force >= 2 && dans === 2) mus.add(H2, t, 0.1 + 0.035 * force, 0.2);
   }
@@ -157,25 +153,25 @@ function mesurePleine(bar, force, { jusque = 16 } = {}) {
 // mesures 3 à 6 : elle tombe et ne lâche plus. Trois repères : la première couleur, le tampon, le compteur bloqué.
 mesurePleine(2, 1); mesurePleine(3, 1); mesurePleine(4, 2); mesurePleine(5, 2);
 mus.add(IMP, CHUTE, 0.9); echo.add(IMP, CHUTE, 0.15);
-accord(10 * BEAT, [76, 83], 0.5, 0.28);
-mus.add(IMP, 21 * BEAT, 0.7); { const s = cloche(midi(88), 0.4); mus.add(s, 23 * BEAT, 0.34); echo.add(s, 23 * BEAT, 0.4); }
+accord(10 * BEAT, [78, 85], 0.5, 0.28);
+mus.add(IMP, 21 * BEAT, 0.7); { const s = cloche(midi(90), 0.4); mus.add(s, 23 * BEAT, 0.34); echo.add(s, 23 * BEAT, 0.4); }
 mus.add(laser(2600, 500), 2 * BAR + 14 * S16 + 2 * BAR, 0.15, -0.5); mus.add(laser(3000, 600), DOUBLE - 2 * S16, 0.16, 0.5);
 // mesures 7 et 8 : la semaine pleine. Un coup par demi-temps ; un roulement ; le grand coup du compteur (troisième
 // temps de la mesure 8) ; un dernier coup pour la semaine entière, tenue : le seul répit.
 mesurePleine(6, 3); mesurePleine(7, 3, { jusque: 8 });
 mus.add(IMP, DOUBLE, 0.9); echo.add(IMP, DOUBLE, 0.15);
 for (let k = 0; k < 8; k++) mus.add(S1, 29 * BEAT + k * (S16 / 2), 0.12 + 0.4 * (k / 8) ** 2, -0.1);
-{ const t = 30 * BEAT; coup(t, 1); mus.add(IMP, t, 0.8); mus.add(C1, t, 0.75); echo.add(C1, t, 0.3); accord(t, [76, 83, 88], 0.5, 0.3); tb.add(basse(midi(FONDAMENTALES[1]), 0.44, { attaque: 0.5 }), t, 0.8); }
+{ const t = 30 * BEAT; coup(t, 1); mus.add(IMP, t, 0.8); mus.add(C1, t, 0.75); echo.add(C1, t, 0.3); accord(t, [78, 85, 90], 0.5, 0.3); tb.add(basse(midi(FONDAMENTALES[1]), 0.44, { attaque: 0.5 }), t, 0.8); }
 { const t = 31 * BEAT; coup(t, 1); mus.add(C1, t, 0.7); echo.add(C1, t, 0.3); tb.add(basse(midi(FONDAMENTALES[1]), 0.46, { attaque: 0.4, chute: 0.3 }), t, 0.7); mus.add(souffle(BEAT, 300, 8000, 2.2), t, 0.45); }
 
 // --- mesures 9 et 10 : la sortie. Un grand coup, la mélodie loin dans l'écho pendant le recul, un passage d'air
 //     quand la caméra part « d'un trait », puis le dernier coup pour le logo : l'accord tenu, et le silence.
-for (const m of [40, 47, 55]) nappe(nL, nR, midi(m), SORTIE, D - 0.3, 0.22);
-mus.add(IMP, SORTIE, 1.0); echo.add(IMP, SORTIE, 0.3); coup(SORTIE, 1); tb.add(basse(midi(40), BAR * 0.8, { attaque: 0.5, chute: 0.4 }), SORTIE, 0.7);
+for (const m of [42, 49, 57]) nappe(nL, nR, midi(m), SORTIE, D - 0.3, 0.22);
+mus.add(IMP, SORTIE, 1.0); echo.add(IMP, SORTIE, 0.3); coup(SORTIE, 1); tb.add(basse(midi(42), BAR * 0.8, { attaque: 0.5, chute: 0.4 }), SORTIE, 0.7);
 cloches(0, SORTIE, { sourde: 1, octave: -12, gain: 0.3, echoGain: 0.5 });
 mus.add(souffle(BEAT, 300, 5000, 2, 1), SORTIE + 2 * BEAT - 0.1, 0.5);
 mus.add(souffle(2 * BEAT, 300, 9000, 2.2), DERNIER - 2 * BEAT, 0.5);
-{ mus.add(IMP, DERNIER, 1.0); echo.add(IMP, DERNIER, 0.3); coup(DERNIER, 1); tb.add(basse(midi(40), BAR * 0.9, { attaque: 0.5, chute: 0.5 }), DERNIER, 0.75); for (const [m, g] of [[76, 0.4], [79, 0.25], [83, 0.25]]) { const s = cloche(midi(m), 0.9); mus.add(s, DERNIER, g); echo.add(s, DERNIER, 0.4); } }
+{ mus.add(IMP, DERNIER, 1.0); echo.add(IMP, DERNIER, 0.3); coup(DERNIER, 1); tb.add(basse(midi(42), BAR * 0.9, { attaque: 0.5, chute: 0.5 }), DERNIER, 0.75); for (const [m, g] of [[78, 0.4], [81, 0.25], [85, 0.25]]) { const s = cloche(midi(m), 0.9); mus.add(s, DERNIER, g); echo.add(s, DERNIER, 0.4); } }
 // la basse s'efface une fraction de seconde sous chaque coup de grosse caisse : c'est ce qui la fait « pomper »
 { const g = new Float32Array(mus.n).fill(1); for (const tc of coups) for (let i = secs(tc); i < Math.min(mus.n, secs(tc + 0.09)); i++) g[i] = Math.min(g[i], 0.35 + 0.65 * Math.max(0, i / SR - tc) / 0.09); for (let i = 0; i < mus.n; i++) { mus.L[i] += tb.L[i] * g[i]; mus.R[i] += tb.R[i] * g[i]; } }
 mus.addStereo(nL, nR, 0, 1); echo.addStereo(nL, nR, 0, 0.6);
@@ -190,7 +186,7 @@ function vibreur(len) { const n = secs(len), o = new Float32Array(n), lp = new B
 function bulle(f = 620) { const n = secs(0.09), o = new Float32Array(n); let ph = 0; for (let i = 0; i < n; i++) { const p = i / n; ph += (f * (1 + 1.1 * p)) / SR; o[i] = Math.sin(TAU * ph) * Math.min(1, i / 40) * (1 - p) ** 1.5; } return o; }
 function papier() { const n = secs(0.16), o = new Float32Array(n), f = new SVF(); for (let i = 0; i < n; i++) { const p = i / n, e = Math.abs(Math.sin(Math.PI * 1.5 * p)); o[i] = f.tick(alea(), 2600 + 2600 * e, 1.2).bp * e ** 0.6 * (1 - 0.4 * p); } return o; }
 const CLAC = bruit(0.06, 3200, 0.8, 0.012), SOURD = choc(90), TOC = choc(160, 0.1);
-// le problème : le vibreur dès la première image, une bulle par message des acheteurs, le papier des ratures (visites annulées)
+// le problème : le vibreur dès la première image, une bulle par message, le papier des ratures
 bru.add(vibreur(0.42), 0, 0.55, 0.2);
 [[1, 0], [3, 1], [4, 2]].forEach(([b, k]) => { bru.add(bulle(560 + 70 * k), b * BEAT, 0.7, 0.2); bru.add(vibreur(0.16), b * BEAT + 0.04, 0.45, 0.2); });
 [2, 5].forEach((b) => bru.add(papier(), b * BEAT - 0.05, 0.9, -0.3));
@@ -203,12 +199,12 @@ bru.add(souffle(0.14, 500, 4000, 1), 14 * BEAT - 0.05, 0.6); bru.add(TOC, 14 * B
 // rappeler : le départ de la notification, elle se pose ; la coche repart, et revient sur la case
 bru.add(laser(700, 2400, 0.2), 16 * BEAT, 0.3, -0.3); bru.add(souffle(0.45, 500, 5000, 1.2, 1), 16 * BEAT, 0.7, -0.2); bru.add(TOC, 17 * BEAT, 0.8, -0.4); bru.add(verre(1980, 0.5), 17 * BEAT, 0.4, -0.4);
 bru.add(laser(900, 2800, 0.16), 18 * BEAT, 0.25, -0.2); bru.add(verre(2100, 0.35), 19 * BEAT, 0.4); bru.add(verre(2800, 0.5), 19 * BEAT + 0.07, 0.4);
-// la vente : le tampon « Vendu » arrive, s'abat ; le compteur cliquette et se bloque
+// encaisser : le tampon arrive, s'abat ; le total cliquette et se bloque
 bru.add(souffle(0.2, 400, 3500, 1.5), 20 * BEAT - 0.16, 0.8, 0.4); bru.add(TOC, 20 * BEAT, 0.6, 0.2);
 bru.add(SOURD, 21 * BEAT, 1.0); bru.add(CLAC, 21 * BEAT, 0.8);
 for (let k = 0; k < 14; k++) bru.add(CLAC, 22 * BEAT + k / 28, 0.22 + 0.2 * (k / 14), 0.3);
 bru.add(SOURD, 23 * BEAT, 0.8); bru.add(verre(2400, 0.6), 23 * BEAT, 0.4, 0.3);
-// la semaine pleine : la cascade (un coup sec par voiture vendue), puis le compteur se bloque
+// la semaine pleine : la cascade (un coup sec par case payée), puis le compteur se bloque
 PAIEMENTS.forEach((t, k) => bru.add(TOC, t, 0.5, -0.6 + (1.2 * k) / PAIEMENTS.length));
 bru.add(SOURD, 30 * BEAT, 1.0); bru.add(verre(2400, 0.7), 30 * BEAT, 0.45, 0.3);
 // la signature : le souffle du trait, l'accord final sur le logo, le nom, le bouton
