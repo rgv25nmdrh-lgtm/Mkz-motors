@@ -1,0 +1,4 @@
+videos/*/out/
+videos/*/audio/*.wav
+videos/*/audio/stems/
+node_modules/
