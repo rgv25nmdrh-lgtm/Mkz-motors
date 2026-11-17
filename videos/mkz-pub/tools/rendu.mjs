@@ -39,6 +39,7 @@ const WORKERS = +opt('workers', Math.max(2, Math.min(6, os.cpus().length - 3)));
 const QUALITE = +opt('quality', 94);
 const SHUTTER = +opt('shutter', 0.5);
 const SCENE = opt('scene', 'scene/index.html');
+const DELAI = +opt('delai', 30) * 1000;   /* délai maximal pour calculer une image, en secondes */
 
 /* ── serveur statique local (racine : videos/exemple-hero) ── */
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.mp4': 'video/mp4', '.json': 'application/json' };
@@ -109,10 +110,10 @@ async function ouvrirChrome(n) {
   await cmd('Page.navigate', { url: URL_SCENE }, 30000);
   /* la page doit se charger en 60 s (sinon ce Chrome est abandonné et relancé, voir ouvrirChromeSur) */
   { let minuterie; await Promise.race([charge, new Promise((_, ko) => { minuterie = setTimeout(() => ko(new Error('chargement de la page : pas de réponse en 60 s')), 60000); })]); clearTimeout(minuterie); }   // minuterie annulée : sinon le programme attend 60 s avant de rendre la main
-  for (let i = 0; i < 600; i++) { if (await evaluer('!!window.__ready')) break; await sleep(50); }
+  for (let i = 0; i < 600; i++) { if (await evaluer('!!window.__ready', DELAI * 2)) break; await sleep(50); }
   if (erreurs.length) console.error(`[chrome ${n}] erreurs de page :\n  ` + erreurs.join('\n  '));
   const capturer = async (t) => {
-    await evaluer(`window.__seek(${t})`, 30000);
+    await evaluer(`window.__seek(${t})`, DELAI);   /* --delai : plus long sans carte graphique */
     const r = await cmd('Page.captureScreenshot', { format: 'jpeg', quality: QUALITE, fromSurface: true, captureBeyondViewport: false }, 30000);
     return Buffer.from(r.data, 'base64');
   };

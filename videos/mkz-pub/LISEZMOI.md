@@ -35,7 +35,7 @@ Pillow (`node tools/verifier.mjs` dit ce qui manque).
 
     node tools/sound.mjs                                  # musique + bruitages → audio/mix.wav
     node tools/rendu.mjs video --scene scene/apercu.html --fps 30 --dpr 0.5 --workers 2 --bitrate 4000000 --out out/apercu-muet.mp4
-    node tools/rendu.mjs video --scene scene/index.html  --fps 30 --dpr 1   --workers 3 --bitrate 12000000 --out out/mkz-muet-1080.mp4
+    node tools/rendu.mjs video --scene scene/index.html  --fps 30 --dpr 1   --workers 2 --delai 240 --bitrate 12000000 --out out/mkz-muet-1080.mp4
     node tools/bin/mux out/mkz-muet-1080.mp4 audio/mix.wav livrables/mkz-motors-pub-1080x1920.mp4
 
 Sans carte graphique, le rendu final prend environ 1 h 30 (8 s par image) ; avec une carte graphique, quelques
