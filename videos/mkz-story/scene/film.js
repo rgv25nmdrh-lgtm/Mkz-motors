@@ -323,10 +323,10 @@ function scene(tt) {
   let pos = S.cam.slice(0, 3), cible = S.cam.slice(3, 6), roulis = S.cam[6] || 0;
   if (!S.sansCoups) {                                         // sur chaque coup de grosse caisse : une poussée et une secousse
     let z = 0, s = 0, pu = 0;
-    for (const [tk, f] of K.frappes) { const d = t - tk; if (d < 0 || d > 0.5) continue; z += 0.05 * f * Math.exp(-d / 0.09); s += f * Math.sin(d * 75) * Math.exp(-d / 0.06); pu += 0.5 * f * choc(t, tk, 0.16); }
+    for (const [tk, f] of K.frappes) { const d = t - tk; if (d < 0 || d > 0.5) continue; z += 0.035 * f * Math.exp(-d / 0.11); s += f * Math.sin(d * 55) * Math.exp(-d / 0.08); pu += 0.5 * f * choc(t, tk, 0.16); }   // version Story : poussée et secousse adoucies
     const dist = v3.lon(v3.sub(cible, pos));
     if (t >= B_.allume && pu > 0.03) S.lumieres.unshift({ p: v3.add(pos, [0, 0.4, 0]), couleur: ORANGE, intensite: 1.5 * pu, rayon: dist * 2.2 });   // l'éclair orange, court (jamais avant la première couleur)
-    pos = v3.mix(pos, cible, z); roulis += 0.55 * s; pos = v3.add(pos, [0, 0.006 * s * dist, 0]); S.sol.pulsation = Math.max(S.sol.pulsation, pu);
+    pos = v3.mix(pos, cible, z); roulis += 0.28 * s; pos = v3.add(pos, [0, 0.003 * s * dist, 0]); S.sol.pulsation = Math.max(S.sol.pulsation, pu);
   }
   return { cam: { pos, cible, roulis, fov: S.fov, ouverture: S.ouverture, ...(S.mise ? { mise: S.mise } : {}) }, boites: S.boites, spheres: S.spheres, lumieres: S.lumieres.slice(0, 4), sol: S.sol, ambiance: ambiance(t) };
 }
@@ -349,7 +349,7 @@ function textures(t) {
     { nom: "compteur", p: { ventes: nSeances(t), bloque: compteurBloque(t) ? 1 : 0 } },
   ]);
 }
-const ECH = window.ECHANTILLONS || 24, OBT = 1 / 120;   // 24 passes par image (scene/apercu.html : moins)
+const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120;   // obturateur : 1/120 s, soit 180° à 60 i/s   // 24 passes par image (scene/apercu.html : moins)
 // ---------------------------------------------------------------- les titres de la Story (calque 2D, pleine définition)
 // Des phrases courtes, posées sur les temps, pour que l'histoire se lise sans le son. Chaque mot monte d'un masque ;
 // la phrase s'efface juste avant la suivante. En haut de l'image, sous la barre d'Instagram (zone sûre : y > 250 px).

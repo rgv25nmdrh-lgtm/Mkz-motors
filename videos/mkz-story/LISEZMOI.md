@@ -13,6 +13,11 @@ bouton « Vendre ma voiture », le planning), et des titres courts posés sur la
 | 10 à 12 | On la vend **pour vous.** |
 | 12 à 15,5 | **Dépôt-vente :** on s'occupe de tout. |
 
+Pour la fluidité : 60 images/s, flou de mouvement à 180° (`OBTURATEUR = 1 / 120` dans `scene/index.html`), poussée et
+secousse de la caméra adoucies sur les coups de grosse caisse. La 3D est calculée en 810 × 1440 (`DEFINITION = 0.75`)
+et agrandie ; avec une carte graphique, mettre `DEFINITION = 1` et `ECHANTILLONS = 24`. Le rendu complet, sans carte
+graphique : `bash outils-rendu/rendu-story.sh` (environ 2 h 30 ; voir le script pour les commandes).
+
 Les titres (tableau `TITRES` dans `scene/film.js`) sont dessinés en pleine définition sur un calque, dans la zone sûre
 des Stories (sous la barre du haut, au-dessus du champ de réponse). Le reste de cette notice vaut pour les deux versions ;
 ici, la sortie est `livrables/mkz-motors-story-1080x1920.mp4` et le muet `out/mkz-story-muet.mp4`.
@@ -54,7 +59,7 @@ des messages) : à remplacer par de vraies valeurs, ou à garder comme illustrat
 | `scene/film.js` | La chorégraphie : les plans, déclarés dans l'ordre par `plan(coupe(instant), …)`. |
 | `scene/moteur.js` | Le moteur 3D du kit (boîtes de verre, sol laqué, lumières), non modifié. |
 | `tools/musique.mjs` | La musique (celle de l'exemple du kit, inchangée) et les bruitages. Si `PRISES` change, le recopier ici aussi. |
-| `scene/index.html`, `scene/apercu.html` | Final (Story : 2 passes par image, 3D en pleine définition 1080 × 1920 ; film 16:9 : 3D en 960 × 540 agrandie) et aperçu (1 passe). Sur un ordinateur avec carte graphique, mettre `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html` pour la qualité maximale du kit. |
+| `scene/index.html`, `scene/apercu.html` | Final (Story : 60 i/s, 2 passes par image, 3D en 810 × 1440 agrandie ; film 16:9 : 30 i/s, 3D en 960 × 540 agrandie) et aperçu (1 passe). Sur un ordinateur avec carte graphique, mettre `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html` pour la qualité maximale du kit. |
 
 ## Fabriquer la vidéo
 
