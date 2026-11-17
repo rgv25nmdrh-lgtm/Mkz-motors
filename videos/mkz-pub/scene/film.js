@@ -66,8 +66,8 @@ plan(P3.in - AV, (t) => {
 const PANNEAU = { x: -0.75, z: -1.75, lacet: Math.atan2(-(4.4 + 1.75), 0.4 + 0.75) };
 plan(P4.in - AV, (t) => {
   const choc = t > P4.tampon ? 0.03 * Math.exp(-(t - P4.tampon) * 14) * Math.sin((t - P4.tampon) * 70) : 0;
-  return { ...PLEIN, podium: podium(t), cle: cle([0.5, POSEE_Y, 0.3], 0.55), panneau: PANNEAU,
-    cam: cam(de(t, P4.in, P5.in, [0.5, 2.0, 4.6], [0.35, 1.85, 4.1], lin).map((v, i) => v + (i === 1 ? choc : 0)), [0.05, 0.9 + choc, -0.3], 40, 0.01, [0.3, 0.6, 0.2]) };
+  return { ...PLEIN, podium: podium(t), cle: cle([-0.2, POSEE_Y, 0.25], Math.PI + 0.3), panneau: PANNEAU,
+    cam: cam(de(t, P4.in, P5.in, [0.4, 2.15, 5.5], [0.3, 2.0, 4.9], lin).map((v, i) => v + (i === 1 ? choc : 0)), [0.05, 0.9 + choc, -0.3], 40, 0.01, [0.3, 0.6, 0.2]) };
 });
 // 5 · l'étiquette en cuir MKZ, qui tourne lentement devant nous
 plan(P5.in - AV, (t) => {
