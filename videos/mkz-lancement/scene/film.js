@@ -200,7 +200,7 @@ function creneau(S, t, o = {}) {
 
 // ================================================================ 7 · LA SIGNATURE (mesures 9 et 10)
 // La caméra recule, d'abord lentement, puis d'un trait. La case du jeudi quitte le planning, vient au centre et devient
-// le logo sur le dernier coup ; le nom sort de derrière elle, le bouton arrive.
+// le logo sur le dernier coup : elle se change en une plaque qui porte le vrai logo de MKZ Motors ; le bouton arrive.
 const K_FIN = orbite([0, 1.8, 0], 5.6, 0, 4);
 const camFin = (t) => cle([[coupe(S_.tenue), orbite([0, 0.95, 0], 3.12, 0, 3)], [V_.recul, orbite([0, 0.95, 0], 3.06, 0, 3), lin], [V_.trait, orbite([0, 1.02, 0], 3.6, 0, 3), E.inQuad],
   [V_.trait + 0.5, orbite([0, 1.8, 0], 5.52, 0, 4), E.inOutCubic], [20, orbite([0, 1.8, 0], 5.66, 0, 4), E.outQuad]], t);
@@ -213,16 +213,19 @@ function repereCam(cam) {
 const CAMF = { pos: K_FIN.slice(0, 3), cible: K_FIN.slice(3, 6) }, REP = repereCam(CAMF), DN = 3.0, UPX = (DN * Math.tan(19 * RAD)) / 540;
 const devant = (x, y) => v3.add(v3.add(CAMF.pos, v3.mul(REP.F, DN)), v3.add(v3.mul(REP.R, (x - 960) * UPX), v3.mul(REP.U, (540 - y) * UPX)));
 const ROT_CAM = [Math.asin(REP.F[1]) / RAD, Math.atan2(-REP.F[0], -REP.F[2]) / RAD, 0];
-const Y_LOGO = 215, COTE = 85 * UPX;
+const Y_LOGO = 200, COTE = 85 * UPX, LW = 440 * UPX, LH = (LW * 400) / 1360;   // la plaque du logo : 880 px de large
 function signature(S, t) {
   if (t < V_.trait) return;
   const f = cle([[V_.trait, 0], [V_.trait + 0.5, 0.4, E.outCubic], [V_.dernier, 1, E.inCubic]], t), g = E.inOutCubic(prog(t, V_.nom, 0.3)), m = E.inOutCubic(f);
-  const c = v3.mix(HEROS, devant(lerp(960, 615, g), Y_LOGO), f), rot = v3.mix(PL.rot, ROT_CAM, f); rot[2] += 360 * m;
+  const c = v3.mix(HEROS, devant(960, Y_LOGO), f), rot = v3.mix(PL.rot, ROT_CAM, f); rot[2] += 360 * m;
   const e = 1 + 0.16 * ecrase(t, V_.dernier, 0.22), co = choc(t, V_.dernier, 0.3);
-  S.boites.push({ ...VERRE, c, d: [lerp(D_CASE[0], COTE, m) * e, lerp(D_CASE[1], COTE, m) * e, lerp(D_CASE[2], 0.02, m)], rot, rayon: lerp(R_CASE, 0.4 * COTE, m), ...face("caseHeros"), ...dos("caseHeros"), ecran: 1.15, tranche: ORANGE, trancheGain: 0.6 + 2 * co });
+  if (t < V_.dernier) S.boites.push({ ...VERRE, c, d: [lerp(D_CASE[0], COTE, m) * e, lerp(D_CASE[1], COTE, m) * e, lerp(D_CASE[2], 0.02, m)], rot, rayon: lerp(R_CASE, 0.4 * COTE, m), ...face("caseHeros"), ...dos("caseHeros"), ecran: 1.15, tranche: ORANGE, trancheGain: 0.6 + 2 * co });
+  else {                                                     // le dernier coup : le carré rouge s'ouvre en plaque, le logo apparaît
+    const k = E.outBack(prog(t, V_.dernier, 0.32), 1.5);
+    S.boites.push({ ...VERRE, c, d: [lerp(COTE, LW, k) * e, lerp(COTE, LH, k) * e, 0.02], rot: ROT_CAM, rayon: lerp(0.4 * COTE, 0.18 * LH, clamp(k)), ...face("logo"), ecran: 1.15, teinte: [0.06, 0.06, 0.07], tranche: ORANGE, trancheGain: 0.5 + 2 * co });
+  }
   S.lumieres.push({ p: v3.add(c, v3.mul(REP.F, -0.7)), couleur: ORANGE, intensite: 0.4 + 1.3 * co, rayon: 3 });
-  if (t >= V_.nom) S.boites.push({ ...DECAL, c: devant(lerp(1468, 1123, g), Y_LOGO), d: [380 * UPX, 103.6 * UPX, 0.0003], rot: ROT_CAM, ...face("nom"), ecran: 1.2 });
-  if (t >= V_.bouton) { const b = 0.5 + 0.5 * E.outBack(prog(t, V_.bouton, 0.24), 2); S.boites.push({ ...VERRE, c: devant(960, 408), d: [330 * UPX * b, 68.3 * UPX * b, 0.012], rot: ROT_CAM, rayon: 68.3 * UPX * b, ...face("bouton"), ecran: 1.15, tranche: ORANGE, trancheGain: 0.5 + 1.4 * choc(t, V_.bouton, 0.2) }); }
+  if (t >= V_.bouton) { const b = 0.5 + 0.5 * E.outBack(prog(t, V_.bouton, 0.24), 2); S.boites.push({ ...VERRE, c: devant(960, 432), d: [330 * UPX * b, 68.3 * UPX * b, 0.012], rot: ROT_CAM, rayon: 68.3 * UPX * b, ...face("bouton"), ecran: 1.15, tranche: ORANGE, trancheGain: 0.5 + 1.4 * choc(t, V_.bouton, 0.2) }); }
 }
 function finale(S, t) {
   const k = camFin(t), z = 0.02 * choc(t, S_.tenue, 0.1) + 0.03 * choc(t, V_.dernier, 0.12);
@@ -317,7 +320,7 @@ function scene(tt) {
 // ---------------------------------------------------------------- les textures
 function texturesFixes() {
   composer(0, [{ nom: "bulle0" }, { nom: "bulle1" }, { nom: "bulle2" }, { nom: "bulleN" }, { nom: "tuile" }, { nom: "coche" }, { nom: "notif" }, { nom: "tampon" },
-    ...CRENEAU.HEURES.map((_, r) => ({ nom: "payee" + r })), { nom: "bouton" }]);
+    ...CRENEAU.HEURES.map((_, r) => ({ nom: "payee" + r })), { nom: "bouton" }, { nom: "logo" }]);
 }
 function textures(t) {
   const u = tFige(t), dernier = T_B.reduce((x, tb) => (u >= tb ? tb : x), -9), da = t - R_.appui;
@@ -331,7 +334,6 @@ function textures(t) {
     { nom: "caseHeros", p: etatHeros(t) },
     { nom: "compteur", p: { ventes: nSeances(t), bloque: compteurBloque(t) ? 1 : 0 } },
   ]);
-  composer(3, [{ nom: "nom", p: { e: arr(E.inOutCubic(prog(t, V_.nom, 0.3)), 3) } }]);
 }
 const ECH = window.ECHANTILLONS || 24, OBT = 1 / 120;   // 24 passes par image (scene/apercu.html : moins)
 window.__seek = (t) => { t = clamp(t, 0, 19.9999); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT }); M.attendre(); };

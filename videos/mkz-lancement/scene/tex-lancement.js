@@ -121,8 +121,7 @@
   };
   definirTexture("planning", { l: GR.L, h: GR.H, grille: GR, dessiner(ctx, p = {}) {
     plaqueDeVerre(ctx, GR.L, GR.H, 44, blanc(0.26), 5);
-    bloc(ctx, 58, 52, 132, 132, 30, C.accent); texte(ctx, "MKZ", 124, 140, { taille: 56, graisse: 800, serre: -0.03, couleur: C.surAccent, align: "center" });
-    texte(ctx, "MKZ Motors", 222, 168, { taille: 150, graisse: 600, serre: -0.045 });
+    ctx.drawImage(LOGO, 46, 40, 160 * LOGO.width / LOGO.height, 160);   // le logo de MKZ Motors
     texte(ctx, "Dépôt-vente · semaine du 12 octobre", 64, 260, { taille: 54, couleur: C.doux });
     JOURS.forEach(([j, n], i) => texte(ctx, j + " " + n, GR.x0 + i * GR.px + GR.l / 2, 314, { taille: 40, mono: true, graisse: i === 3 ? 600 : 500, couleur: i === 3 ? C.texte : C.doux, align: "center" }));
     for (let j = 0; j < 6; j++) for (let r = 0; r < 7; r++) {
@@ -141,14 +140,9 @@
   definirTexture("caseHeros", { l: 1216, h: 448, dessiner(ctx, p = {}) {
     const etat = p.etat ?? 1, r = etat >= 3 ? 1 : clamp(p.rempli ?? 0), ins = clamp(p.inscrit ?? 1), cont = clamp(p.contenu ?? 1), xr = 1216 * r;
     const fond = () => rrect(ctx, 7, 7, 1202, 434, 86);
-    fond(); ctx.fillStyle = "rgba(238,43,54,0.16)"; ctx.fill();
+    fond(); ctx.fillStyle = "rgba(250,15,20,0.16)"; ctx.fill();
     ctx.save(); fond(); ctx.clip(); ctx.fillStyle = C.accent; ctx.fillRect(0, 0, xr, 448); ctx.restore();
     fond(); ctx.strokeStyle = C.accent; ctx.lineWidth = 14; ctx.stroke();
-    if (cont < 0.999) {                                      // le logo : le monogramme MKZ apparaît dans la case
-      // à la fin, la case devient un carré : le dessin y est écrasé de 1216 × 448 vers un carré, on l'étire d'autant
-      ctx.save(); ctx.globalAlpha = 1 - cont; ctx.translate(608, 224); ctx.scale(1216 / 448, 1);
-      texte(ctx, "MKZ", 0, 52, { taille: 150, graisse: 800, serre: -0.04, couleur: C.surAccent, align: "center" }); ctx.restore();
-    }
     if (cont <= 0.01) return;
     const textes = (c1, c2) => {
       if (etat === 6) { ctx.save(); ctx.globalAlpha = cont; casePayee(ctx, 0, 0, 4, "18:30"); ctx.restore(); return; }
@@ -170,7 +164,7 @@
   definirTexture("reservation", { l: 560, h: 1160, bouton: [0.5, 880 / 1160], dessiner(ctx, p = {}) {
     bloc(ctx, 0, 0, 560, 1160, 74, "#050506"); bloc(ctx, 14, 14, 532, 1132, 60, "#131316");
     bloc(ctx, 200, 30, 160, 34, 17, "#050506");
-    bloc(ctx, 48, 112, 56, 56, 14, C.accent); texte(ctx, "MKZ Motors", 122, 158, { taille: 52, graisse: 600, serre: -0.04 });
+    ctx.drawImage(LOGO, 44, 104, 72 * LOGO.width / LOGO.height, 72);
     texte(ctx, VEHICULE, 48, 266, { taille: 52, graisse: 600 }); texte(ctx, KM + " · dépôt-vente", 48, 316, { taille: 34, couleur: C.doux });
     bloc(ctx, 34, 372, 492, 340, 44, "#1c1c21", blanc(0.14), 2);
     texte(ctx, "Jeudi 18:30", 60, 494, { taille: 86, graisse: 600, serre: -0.045 });
@@ -179,7 +173,7 @@
     const a = clamp(p.appui ?? 0), e = 1 - 0.06 * a;
     ctx.save(); ctx.translate(280, 880); ctx.scale(e, e);
     if (p.fait) { bloc(ctx, -246, -84, 492, 168, 84, "#1c1c21", C.accent, 6); coche(ctx, -150, 0, 56, C.accent, 15); texte(ctx, "Réservé", 44, 28, { taille: 80, graisse: 600, couleur: C.accent, align: "center" }); }
-    else { bloc(ctx, -246, -84, 492, 168, 84, a > 0.01 ? `rgb(${Math.round(238 - 46 * a)},${Math.round(43 - 10 * a)},${Math.round(54 - 12 * a)})` : C.accent); texte(ctx, "Réserver", 0, 28, { taille: 84, graisse: 600, couleur: C.surAccent, align: "center" }); }
+    else { bloc(ctx, -246, -84, 492, 168, 84, a > 0.01 ? `rgb(${Math.round(250 - 48 * a)},${Math.round(15 - 3 * a)},${Math.round(20 - 4 * a)})` : C.accent); texte(ctx, "Réserver", 0, 28, { taille: 84, graisse: 600, couleur: C.surAccent, align: "center" }); }
     ctx.restore();
     const c = clamp(p.contact ?? 0), o = p.onde ?? 0;
     if (c > 0.01) { const ray = lerp(150, 64, E.outCubic(c)); disque(ctx, 280, 880, ray, blanc(0.3 * c)); ctx.strokeStyle = blanc(0.85 * c); ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(280, 880, ray, 0, TAU); ctx.stroke(); }
@@ -189,7 +183,7 @@
   // ------------------------------------------------------------------ le rappel : une notification, puis la coche qui revient
   definirTexture("notif", { l: 1400, h: 440, dessiner(ctx) {
     bloc(ctx, 5, 5, 1390, 430, 80, "#202026", blanc(0.28), 5);
-    bloc(ctx, 56, 48, 92, 92, 24, C.accent); texte(ctx, "MKZ Motors", 176, 118, { taille: 66, graisse: 600, couleur: C.doux });
+    ctx.drawImage(LOGO, 50, 40, 104 * LOGO.width / LOGO.height, 104);
     texte(ctx, "maintenant", 1340, 118, { taille: 54, couleur: C.sourd, align: "right" });
     const lignes = ["Rappel" + INS + ": essai routier,", "demain 18:30"], o = { taille: 116, graisse: 600, serre: -0.03 }, taille = ajuste(ctx, lignes, o, 1280);
     lignes.forEach((s, k) => texte(ctx, s, 58, 266 + k * 126, { ...o, taille }));
@@ -211,7 +205,12 @@
     texte(ctx, v >= 2 ? "vendues" : "vendue", 62 + w + 36, 392, { taille: 110, graisse: 600, couleur: b ? C.texte : blanc(0.9) });
   } });
 
-  // ------------------------------------------------------------------ la signature : le nom, le bouton (le logo est la case)
+  // ------------------------------------------------------------------ la signature : le logo de MKZ Motors, le bouton
+  // Le logo est posé sur une plaque de verre sombre ; la case du film la devient sur le dernier coup.
+  definirTexture("logo", { l: 1360, h: 400, dessiner(ctx) {
+    bloc(ctx, 5, 5, 1350, 390, 70, "rgba(10,10,12,0.96)", blanc(0.22), 5);
+    const h = 280, w = h * LOGO.width / LOGO.height; ctx.drawImage(LOGO, (1360 - w) / 2, (400 - h) / 2, w, h);
+  } });
   // p : { e: 0..1 (le nom sort de derrière le logo) }
   definirTexture("nom", { l: 1100, h: 300, dessiner(ctx, p = {}) {
     const e = clamp(p.e ?? 1); if (e <= 0.005) return;

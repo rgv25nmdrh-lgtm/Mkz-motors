@@ -1,6 +1,6 @@
 // Outils communs à la scène : vecteurs, poses, courbes dans le temps, atlas de textures.
 const W = 1920, H = 1080, TL = 2048, TH = 4096, RAD = Math.PI / 180;
-const ORANGE = [0.933, 0.169, 0.212];   // l'accent de la marque (le rouge MKZ ; le nom vient du kit d'origine)
+const ORANGE = [0.98, 0.059, 0.078];   // l'accent de la marque (le rouge MKZ ; le nom vient du kit d'origine)
 const v3 = {
   add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], mul: (a, k) => [a[0] * k, a[1] * k, a[2] * k],
   mix: (a, b, p) => [a[0] + (b[0] - a[0]) * p, a[1] + (b[1] - a[1]) * p, a[2] + (b[2] - a[2]) * p],

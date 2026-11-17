@@ -1,10 +1,14 @@
 // MKZ Motors, film de lancement du dépôt-vente : socle commun (charte, polices, conducteur, outils de dessin
 // sur canevas, registre des textures). Chargé après timing.js, lib.js (clamp, lerp, prog, E, hash) et cues.js.
-const C = { fond: "#0d0d0f", surface: "#151518", surface2: "#1c1c21", ligne: "#27272c", ligne2: "#34343b", texte: "#f2f2ef", doux: "#a3a3ab", sourd: "#6b6b74", accent: "#ee2b36", surAccent: "#1a0507" };   // le rouge MKZ
+const C = { fond: "#0d0d0f", surface: "#151518", surface2: "#1c1c21", ligne: "#27272c", ligne2: "#34343b", texte: "#f2f2ef", doux: "#a3a3ab", sourd: "#6b6b74", accent: "#fa0f14", surAccent: "#1a0405" };   // le rouge du logo MKZ Motors
 const { K, sfx: SFX } = buildCues(TIMING);
 
 // Polices prêtes avant tout dessin (canevas et DOM).
+// Le vrai logo de MKZ Motors (scene/logo-mkz.png, fond transparent), chargé avant tout dessin.
+const LOGO = new Image();
+LOGO.src = "logo-mkz.png";
 const POLICES_PRETES = Promise.all([
+  LOGO.decode(),
   ...[300, 400, 500, 600, 700].map((w) => document.fonts.load(`${w} 40px "Geist"`, "MKZ Motors Dépôt-vente éàèù·…’€?")),
   ...[400, 500, 600].map((w) => document.fonts.load(`${w} 40px "Geist Mono"`, "0123456789:·€")),
 ]).then(() => document.fonts.ready);
