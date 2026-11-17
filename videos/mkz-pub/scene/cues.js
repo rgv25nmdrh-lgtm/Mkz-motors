@@ -1,11 +1,11 @@
 // Le conducteur de la publicité MKZ Motors : l'instant de chaque animation et de chaque bruitage, sur la grille de la
 // musique (120 BPM : un temps = 0,5 s). Utilisé par la scène (animations) et par le son (bruitages) : une seule source.
-//   1 · 0–2 s    le noir ; la voiture se déverrouille, les phares s'allument
-//   2 · 2–6 s    les rampes du plafond s'allument une à une ; la voiture tourne sur son plateau. « Des occasions sélectionnées »
-//   3 · 6–8 s    de près, le long du flanc et sur la jante. « Contrôlées, prêtes à rouler »
+//   1 · 0–2 s    le noir ; le voyant de la clé clignote (déverrouillage), un spot claque sur le podium
+//   2 · 2–6 s    les rampes du plafond s'allument une à une ; la clé s'élève. « Des occasions sélectionnées »
+//   3 · 6–8 s    très près, sur les touches. « Contrôlées, prêtes à rouler »
 //   4 · 8–12 s   le panneau « À VENDRE » ; le tampon « VENDU » claque. « Vous vendez ? On la vend pour vous. »
-//   5 · 12–16 s  l'arrière, feux allumés ; le dépôt-vente en quatre étapes
-//   6 · 16–20 s  de face ; l'enseigne s'allume, appel de phares, le nom, le site
+//   5 · 12–16 s  l'étiquette en cuir MKZ ; le dépôt-vente en quatre étapes
+//   6 · 16–20 s  de face ; l'enseigne s'allume, le voyant et l'anneau du podium pulsent, le nom, le site
 globalThis.buildCues = function (T) {
   const SH = T.shots.map((s) => s.start), B = 60 / T.bpm;   // B : un temps
   const K = {};
@@ -19,8 +19,8 @@ globalThis.buildCues = function (T) {
   // Bruitages : un par geste. k = type de son, g = intensité (0..1), p = position gauche/droite.
   const sfx = [];
   const add = (t, k, g = 0.6, p = 0) => sfx.push({ t: +t.toFixed(3), k, g, p });
-  add(K.p1.bip, "bip", 0.7, -0.2); add(K.p1.bip + 0.16, "bip", 0.6, -0.2);   // la voiture se déverrouille
-  add(K.p1.phares, "phares", 0.8);                                          // les phares claquent
+  add(K.p1.bip, "bip", 0.7, -0.2); add(K.p1.bip + 0.16, "bip", 0.6, -0.2);   // la clé déverrouille
+  add(K.p1.phares, "phares", 0.8);                                          // le spot claque
   add(K.p1.titre, "tone0", 0.4);
   K.p2.rampes.forEach((t, i) => add(t, "rampe", 0.75, (i - 1) * 0.4));        // les rampes du plafond
   add(K.p2.in + 0.02, "whoosh", 0.4);

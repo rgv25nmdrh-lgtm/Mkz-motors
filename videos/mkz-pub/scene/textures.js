@@ -1,5 +1,6 @@
-// Les dessins de la publicité MKZ Motors : ce qui est imprimé dans le décor (le panneau « À VENDRE » et son tampon
-// « VENDU », l'enseigne du mur du fond), et le calque des textes posé par-dessus l'image, en pleine définition.
+// Les dessins de la publicité MKZ Motors : ce qui est imprimé dans le décor (les pictogrammes de la clé, le marquage de
+// l'étiquette en cuir, le panneau « À VENDRE » et son tampon « VENDU », l'enseigne du mur du fond), et le calque des
+// textes posé par-dessus l'image, en pleine définition.
 const ROUGE = "#e3262f", BLANC = "#f4f2ee", NOIR = "#111214";
 const toile = (l, h) => { const c = document.createElement("canvas"); c.width = l; c.height = h; return [c, c.getContext("2d")]; };
 function ecrire(x, s, cx, y, taille, graisse, espace = 0, police = "Geist", couleur = BLANC, align = "center") {
@@ -34,6 +35,38 @@ function panneau(tampon) {
     for (let i = 0; i < 900; i++) { x.globalAlpha = 0.5 * hash(i); x.fillRect(-440 + 880 * hash(i + 0.3), -160 + 320 * hash(i + 0.7), 3 + 9 * hash(i + 0.1), 2 + 4 * hash(i + 0.9)); }
     x.restore();
   }
+  return c;
+}
+
+// Le dessus de la clé, vu de haut (le moteur le pose sur la coque) : trois touches et leurs pictogrammes, le monogramme.
+// Le canevas est retourné verticalement pour que tout se lise à l'endroit sur la coque.
+function dessusCle() {
+  const [c, x] = toile(1240, 600);
+  x.translate(0, 600); x.scale(1, -1);
+  const touche = (cx, dessin) => {
+    x.fillStyle = "rgba(38,38,42,1)"; x.beginPath(); x.arc(cx, 300, 50, 0, 2 * Math.PI); x.fill();
+    x.strokeStyle = "rgba(170,170,176,0.9)"; x.lineWidth = 3; x.stroke();
+    x.save(); x.translate(cx, 300); x.strokeStyle = "rgba(236,236,240,1)"; x.fillStyle = "rgba(236,236,240,1)"; x.lineWidth = 6; x.lineCap = "round"; dessin(); x.restore();
+  };
+  const cadenas = (ouvert) => () => {
+    x.beginPath(); x.roundRect(-17, -4, 34, 26, 4); x.fill();
+    x.beginPath(); x.arc(0, -6, 11, Math.PI, ouvert ? 1.75 * Math.PI : 2 * Math.PI); if (!ouvert) x.lineTo(11, -2); x.moveTo(-11, -6); x.lineTo(-11, -2); x.stroke();
+  };
+  touche(840, cadenas(false)); touche(640, cadenas(true));
+  touche(440, () => { x.beginPath(); x.moveTo(-20, 10); x.lineTo(-14, -12); x.lineTo(14, -12); x.lineTo(20, 10); x.closePath(); x.stroke(); x.beginPath(); x.moveTo(-22, 16); x.lineTo(22, 16); x.stroke(); });   // le coffre
+  x.save(); x.translate(205, 300); x.rotate(-Math.PI / 2);
+  ecrire(x, "MKZ", 0, 16, 46, 800, 0.02, "Geist", "rgba(150,150,156,0.95)"); x.restore();
+  return c;
+}
+
+// L'étiquette en cuir accrochée à l'anneau : le nom marqué à chaud, une piqûre tout autour.
+function etiquetteCle() {
+  const [c, x] = toile(1088, 480);
+  x.strokeStyle = "rgba(255,210,200,0.55)"; x.lineWidth = 4; x.setLineDash([14, 10]); x.beginPath(); x.roundRect(46, 46, 996, 388, 26); x.stroke(); x.setLineDash([]);
+  x.fillStyle = "rgba(20,4,6,0.85)"; x.beginPath(); x.arc(980, 240, 30, 0, 2 * Math.PI); x.fill();   // l'œillet
+  x.save(); x.translate(1088, 0); x.scale(-1, 1);              // le moteur lit l'étiquette en miroir : le marquage est retourné
+  ecrire(x, "MKZ", 618, 250, 170, 800, -0.02, "Geist", "rgba(250,232,226,0.92)");
+  ecrire(x, "MOTORS", 618, 340, 54, 600, 0.5, "Geist", "rgba(250,232,226,0.85)"); x.restore();
   return c;
 }
 

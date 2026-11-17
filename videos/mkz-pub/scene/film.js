@@ -1,11 +1,12 @@
-// Publicité MKZ Motors : 20 s, verticale, 1080×1920, sans voix (musique et bruitages). Une voiture d'occasion dans
-// le showroom, sur son plateau tournant. Les instants viennent du conducteur (cues.js), posé sur la grille de la musique.
-//   1 · 0–2 s    le noir ; la voiture se déverrouille, les phares s'allument
-//   2 · 2–6 s    les rampes du plafond s'allument une à une ; la voiture tourne. « Des occasions sélectionnées. »
-//   3 · 6–8 s    le long du flanc, jusqu'à la jante. « Contrôlées, prêtes à rouler. »
-//   4 · 8–12 s   le panneau « À VENDRE », le tampon « VENDU ». « Vous vendez votre voiture ? » « On la vend pour vous. »
-//   5 · 12–16 s  l'arrière, feux allumés. « Dépôt-vente : on s'occupe de tout. » Estimation, annonces, visites, démarches
-//   6 · 16–20 s  de face ; l'enseigne s'allume, appel de phares. « Achat · Vente · Dépôt-vente », mkzmotors.com
+// Publicité MKZ Motors : 20 s, verticale, 1080×1920, sans voix (musique et bruitages). Le héros est une clé de voiture,
+// le symbole de ce que fait MKZ Motors (vendre des occasions, vendre la voiture des clients) : une coque noire laquée,
+// un anneau chromé, une étiquette en cuir rouge, sur un podium dans le showroom. Les instants viennent du conducteur.
+//   1 · 0–2 s    le noir ; le voyant de la clé clignote (déverrouillage), un spot claque sur le podium
+//   2 · 2–6 s    les rampes du plafond s'allument une à une ; la clé s'élève et tourne. « Des occasions sélectionnées. »
+//   3 · 6–8 s    très près, sur les touches. « Contrôlées, prêtes à rouler. »
+//   4 · 8–12 s   la clé posée, le panneau « À VENDRE », le tampon « VENDU ». « Vous vendez votre voiture ? »
+//   5 · 12–16 s  l'étiquette en cuir MKZ. « Dépôt-vente : on s'occupe de tout. » Estimation, annonces, visites, démarches
+//   6 · 16–20 s  de face ; l'enseigne s'allume, la clé flotte devant. « Achat · Vente · Dépôt-vente », mkzmotors.com
 const W = SCENE_W, H = SCENE_H, AV = 1 / 60, DUREE_FILM = 20;
 const { K } = buildCues(TIMING);
 const CUES = K, P1 = K.p1, P2 = K.p2, P3 = K.p3, P4 = K.p4, P5 = K.p5, P6 = K.p6;
@@ -13,60 +14,73 @@ const mix3 = (a, b, p) => a.map((x, i) => x + (b[i] - x) * p);
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const lin = (x) => x;
 const allume = (t, t0, d = 0.12) => (t < t0 ? 0 : Math.min(1, (t - t0) / d) * (1 + 0.5 * Math.exp(-(t - t0) * 9) * Math.abs(Math.sin((t - t0) * 60))));   // un tube qui s'allume en clignant
+const impulsion = (t, t0, d = 0.09) => (t >= t0 && t < t0 + d ? Math.sin(((t - t0) / d) * Math.PI) : 0);
 
-// ---------------------------------------------------------------- la voiture
-const PEINTURE = [0.36, 0.012, 0.018];                     // rouge profond, vernis
-// le plateau tourne lentement ; chaque plan choisit son angle de départ
-const voiture = (t, lacet, phares = 0.55, feux = 0.25) => ({ x: 0, z: 0, lacet, roues: 0, peinture: PEINTURE, phares, feux });
-// un point du repère de la voiture, dans le monde (même convention que le moteur : l'avant est +x quand lacet = 0)
-const versMonde = (q, a) => { const c = Math.cos(a), s = Math.sin(a); return [c * q[0] + s * q[2], q[1], -s * q[0] + c * q[2]]; };
+// ---------------------------------------------------------------- la clé
+// pose : centre du repère de la clé (pos), lacet / tangage / roulis en radians, tour : la clé qui tourne sur elle-même.
+// Le moteur l'agrandit (ECH = 1,8) : un objet héros d'1,6 m de long. Posée à plat, son dessous touche le podium.
+const ECH_CLE = 1.8, POSEE_Y = 0.45 + 0.049 * ECH_CLE;
+const cle = (pos, lacet = 0, tangage = 0, roulis = 0, tour = 0, led = 0) => ({ pos, lacet, tangage, roulis, tour, led });
+// un point du repère de la clé, dans le monde (même rotation que le moteur)
+function versMonde(q, k) {
+  const r = (v, ax, a) => { const c = Math.cos(a), s = Math.sin(a); return ax === "y" ? [c * v[0] + s * v[2], v[1], -s * v[0] + c * v[2]] : ax === "z" ? [c * v[0] - s * v[1], s * v[0] + c * v[1], v[2]] : [v[0], c * v[1] - s * v[2], s * v[1] + c * v[2]]; };
+  const v = r(r(r(r(q.map((x) => x * ECH_CLE), "y", k.tour), "x", k.roulis), "z", k.tangage), "y", k.lacet);
+  return [v[0] + k.pos[0], v[1] + k.pos[1], v[2] + k.pos[2]];
+}
+// la clé qui s'élève au-dessus du podium et se redresse face à nous, puis tourne lentement sur elle-même
+const flotte = (t, t0, lacet, haut = 1.25, vitesse = 0.3) => {
+  const p = E.inOutCubic(prog(t, t0, 1.2));
+  return cle([0.45 * (1 - p) + 0.0 * p, lerp(POSEE_Y, haut, p) + 0.015 * Math.sin(t * 2.2) * p, 0], lacet, 0, 0.95 * p, 0.25 * p + vitesse * Math.max(0, t - t0));
+};
 
 // ---------------------------------------------------------------- les plans : [instant de la coupe, la scène]
 const PLANS = [];
 const plan = (a, f) => PLANS.push({ a, f });
 const de = (t, a, z, ka, kb, e = E.inOutCubic) => mix3(ka, kb, e(prog(t, a, z - a)));
 const cam = (pos, cible, fov, ouverture = 0, net) => ({ pos, cible, fov, ouverture, mise: dist(pos, net || cible) });
-const NUIT = { rampes: [0, 0.1, 0], ambiance: 0.05, plateau: [0, 0.15], logo: 0, exposition: 1.35 };
-const PLEIN = { rampes: [1, 1, 1], ambiance: 0.35, plateau: [0, 1], logo: 0, exposition: 1.0 };
+const PLEIN = { rampes: [1, 1, 1], ambiance: 0.35, podium: [0, 1], logo: 0, exposition: 1.0 };
+const podium = (t) => [0.12 * t, 1];
+const add3 = (a, b, k = 1) => a.map((x, i) => x + b[i] * k);
 
-// 1 · le noir, la voiture se déverrouille, les phares s'allument. On est bas, près du phare avant gauche.
+// 1 · le noir : le voyant clignote deux fois (déverrouillage), puis un spot claque sur la clé posée
 plan(0, (t) => {
-  const a = 0.0, ph = allume(t, P1.phares, 0.08) * 0.85 + 0.15 * allume(t, P1.drl, 0.1);
-  const bip = t > P1.bip && t < P1.bip + 0.35 ? 0.5 * Math.max(0, Math.sin(((t - P1.bip) / 0.16) * Math.PI)) : 0;   // les clignotants du déverrouillage
-  const L = versMonde([5.4, 0.95, 3.1], a), C = versMonde([1.2, 0.62, 0.1], a);
-  return { ...NUIT, voiture: voiture(t, a, Math.max(ph, bip), 0.0), cam: cam(de(t, 0, 2, L, versMonde([4.7, 0.85, 2.6], a), lin), C, 36, 0.02, versMonde([2.15, 0.62, 0.6], a)) };
+  const k = cle([0.45, POSEE_Y, 0], 0.35, 0, 0, 0, Math.max(impulsion(t, P1.bip), impulsion(t, P1.bip + 0.16)));
+  const spot = 0.015 + 0.28 * allume(t, P1.phares, 0.06), visee = versMonde([0.08, 0.05, 0], k);
+  return { rampes: [0, 0, 0], ambiance: spot, podium: [0, 0.3 * allume(t, P1.phares, 0.2)], logo: 0, exposition: 1.3, cle: k,
+    cam: cam(de(t, 0, 2, add3(visee, [0.75, 0.62, 1.15]), add3(visee, [0.6, 0.5, 0.92]), lin), add3(visee, [-0.12, -0.05, 0]), 34, 0.01, visee) };
 });
-// 2 · les rampes s'allument une à une ; plan large, la voiture tourne sur son plateau
+// 2 · les rampes s'allument ; la clé s'élève au-dessus du podium et se tourne vers nous
 plan(P2.in - AV, (t) => {
-  const r = P2.rampes.map((x) => allume(t, x)), on = (r[0] + r[1] + r[2]) / 3, a = 0.5 - 0.16 * (t - P2.in);
-  return { rampes: r, ambiance: 0.02 + 0.33 * on, plateau: [a, on], logo: 0, exposition: 1.25 - 0.25 * on, voiture: voiture(t, a),
-    cam: cam(de(t, P2.in, P3.in, [6.6, 3.4, 11.4], [5.2, 2.6, 10.6], E.outCubic), [0, 0.55, 0], 42, 0.02) };
+  const r = P2.rampes.map((x) => allume(t, x)), on = (r[0] + r[1] + r[2]) / 3;
+  return { rampes: r, ambiance: 0.1 + 0.25 * on, podium: [0.12 * t, on], logo: 0, exposition: 1.15 - 0.15 * on, cle: flotte(t, P2.in + 0.3, 0.35),
+    cam: cam(de(t, P2.in, P3.in, [1.7, 1.75, 4.6], [1.3, 1.5, 3.9], E.outCubic), [0, 1.0, 0], 38, 0.012) };
 });
-// 3 · le long du flanc, jusqu'à la jante avant
+// 3 · très près, sur les touches et le voyant ; la caméra glisse le long de la coque
 plan(P3.in - AV, (t) => {
-  const a = -0.25, p = E.inOutCubic(prog(t, P3.in, 2.0));
-  const pos = versMonde(mix3([-2.6, 1.5, 4.6], [0.95, 0.62, 2.3], p), a), cible = versMonde(mix3([0.2, 0.7, 0.4], [1.38, 0.4, 0.8], p), a);
-  return { ...PLEIN, plateau: [a, 1], voiture: voiture(t, a), cam: cam(pos, cible, 32, 0.035) };
+  const k = cle([0, 1.25, 0], 0.35, 0, 0.95, 0.25 + 0.3 * (t - P3.in));
+  const p = E.inOutCubic(prog(t, P3.in, 2)), n = versMonde([0, 1, 0], { ...k, pos: [0, 0, 0] }).map((x) => x / ECH_CLE);
+  const visee = versMonde([lerp(-0.02, 0.19, p), 0.05, lerp(0.03, 0.05, p)], k);
+  return { ...PLEIN, podium: podium(t), cle: k, cam: cam(add3(add3(visee, n, 0.62), [lerp(-0.25, 0.2, p), 0.1, 0]), visee, 30, 0.006, visee) };
 });
-// 4 · le panneau « À VENDRE » devant la voiture ; le tampon « VENDU » claque
-const PANNEAU = { x: -1.75, z: 2.95 };
-const CAM4 = [0.7, 2.0, 11.4];
-const lacetPanneau = Math.atan2(-(CAM4[2] - PANNEAU.z), CAM4[0] - PANNEAU.x) + 0.15;
+// 4 · la clé posée sur le podium, le panneau « À VENDRE » derrière elle ; le tampon « VENDU » claque
+const PANNEAU = { x: -0.75, z: -1.75, lacet: Math.atan2(-(4.4 + 1.75), 0.4 + 0.75) };
 plan(P4.in - AV, (t) => {
-  const a = -0.95, choc = t > P4.tampon ? 0.04 * Math.exp(-(t - P4.tampon) * 14) * Math.sin((t - P4.tampon) * 70) : 0;
-  return { ...PLEIN, plateau: [a, 1], voiture: voiture(t, a), panneau: { ...PANNEAU, lacet: lacetPanneau },
-    cam: cam(de(t, P4.in, P5.in, CAM4, [0.5, 1.85, 10.5], lin).map((v, i) => v + (i === 1 ? choc : 0)), [-0.95, 0.95 + choc, 1.5], 46, 0.02, [-1.2, 1.0, 2.0]) };
+  const choc = t > P4.tampon ? 0.03 * Math.exp(-(t - P4.tampon) * 14) * Math.sin((t - P4.tampon) * 70) : 0;
+  return { ...PLEIN, podium: podium(t), cle: cle([0.5, POSEE_Y, 0.3], 0.55), panneau: PANNEAU,
+    cam: cam(de(t, P4.in, P5.in, [0.5, 2.0, 4.6], [0.35, 1.85, 4.1], lin).map((v, i) => v + (i === 1 ? choc : 0)), [0.05, 0.9 + choc, -0.3], 40, 0.01, [0.3, 0.6, 0.2]) };
 });
-// 5 · l'arrière, feux allumés ; le dépôt-vente en quatre étapes
+// 5 · l'étiquette en cuir MKZ, qui tourne lentement devant nous
 plan(P5.in - AV, (t) => {
-  const a = 1.75 + 0.1 * (t - P5.in), feux = 0.25 + 0.75 * allume(t, P5.feux, 0.1);
-  return { ...PLEIN, plateau: [a, 1], voiture: voiture(t, a, 0.6, feux), cam: cam(de(t, P5.in, P6.in, [-3.2, 1.35, 8.4], [-2.4, 1.15, 7.4], lin), [-0.1, 0.7, 0.2], 40, 0.025) };
+  const k = cle([0, 1.25, 0], -0.2, 0, 0.95, 2.6 + 0.16 * (t - P5.in));
+  const visee = versMonde([-0.58, 0, 0.03], k);
+  return { ...PLEIN, podium: podium(t), cle: k, cam: cam(de(t, P5.in, P6.in, add3(visee, [0.25, 0.75, 1.5]), add3(visee, [0.15, 0.6, 1.25]), lin), add3(visee, [0, -0.08, 0]), 34, 0.008, visee) };
 });
-// 6 · de face : l'enseigne s'allume, appel de phares, le site
+// 6 · de face : l'enseigne s'allume, la clé flotte devant, le voyant clignote, l'anneau du podium pulse
 plan(P6.in - AV, (t) => {
-  const a = -Math.PI / 2 + 0.55 - 0.06 * (t - P6.in), appel = P6.appel.reduce((s, x) => s + Math.max(0, 1 - Math.abs(t - x - 0.08) / 0.12), 0);
-  return { ...PLEIN, plateau: [a, 1], logo: allume(t, P6.logo, 0.15), voiture: voiture(t, a, 0.7 + 1.6 * Math.min(1, appel), 0.25),
-    cam: cam(de(t, P6.in, DUREE_FILM, [2.2, 1.5, 9.8], [1.7, 1.45, 9.0], E.outCubic), [0, 1.85, 0], 44, 0.02, [0, 0.8, 0.5]) };
+  const appel = P6.appel.reduce((s, x) => s + impulsion(t, x, 0.12), 0);
+  const k = cle([-0.35, 0.86 + 0.015 * Math.sin(t * 2.2), 0.3], 0, 0, 1.15, Math.PI - 0.3 + 0.04 * (t - P6.in), appel);
+  return { ...PLEIN, podium: [0.12 * t, 1 + 1.5 * appel], logo: allume(t, P6.logo, 0.15), cle: k,
+    cam: cam(de(t, P6.in, DUREE_FILM, [0.0, 1.6, 6.5], [0.0, 1.55, 5.9], E.outCubic), [0, 1.45, 0], 40, 0.01, [0.2, 0.95, 0.3]) };
 });
 
 // ---------------------------------------------------------------- la scène d'un instant
@@ -92,7 +106,7 @@ Promise.all([500, 600, 700, 800].map((g) => document.fonts.load(`${g} 40px "Geis
   CALQUE = cq.getContext("2d");
   if (W > H) CALQUE.setTransform(H / 1920, 0, 0, H / 1920, (W - (1080 * H) / 1920) / 2, 0);   // cadre 16:9 : le calque vertical est centré
   M = MoteurSDF.creer(cv, { largeur: cv.width, hauteur: cv.height });
-  M.texture("mur", enseigne());
+  M.texture("mur", enseigne()); M.texture("cle", dessusCle()); M.texture("etiquette", etiquetteCle());
   window.__seek(0);
   window.__ready = true;
 });
