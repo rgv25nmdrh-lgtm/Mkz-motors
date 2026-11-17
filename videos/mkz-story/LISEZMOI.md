@@ -54,7 +54,7 @@ des messages) : à remplacer par de vraies valeurs, ou à garder comme illustrat
 | `scene/film.js` | La chorégraphie : les plans, déclarés dans l'ordre par `plan(coupe(instant), …)`. |
 | `scene/moteur.js` | Le moteur 3D du kit (boîtes de verre, sol laqué, lumières), non modifié. |
 | `tools/musique.mjs` | La musique (celle de l'exemple du kit, inchangée) et les bruitages. Si `PRISES` change, le recopier ici aussi. |
-| `scene/index.html`, `scene/apercu.html` | Final (2 passes par image, 3D en 960 × 540 agrandie en 1080p) et aperçu (1 passe). Sur un ordinateur avec carte graphique, mettre `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html` pour la qualité maximale du kit. |
+| `scene/index.html`, `scene/apercu.html` | Final (Story : 2 passes par image, 3D en pleine définition 1080 × 1920 ; film 16:9 : 3D en 960 × 540 agrandie) et aperçu (1 passe). Sur un ordinateur avec carte graphique, mettre `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html` pour la qualité maximale du kit. |
 
 ## Fabriquer la vidéo
 
