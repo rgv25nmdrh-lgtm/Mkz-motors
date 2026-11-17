@@ -2,3 +2,4 @@ videos/*/out/
 videos/*/audio/*.wav
 videos/*/audio/stems/
 node_modules/
+/mkz-motors-apercu.mp4
