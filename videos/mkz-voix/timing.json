@@ -1,0 +1,301 @@
+{
+  "source": "voix",
+  "bpm": 120,
+  "duration": 20,
+  "fps": 30,
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "Vous voulez vendre votre voiture ?",
+      "start": 0.625,
+      "end": 2.039,
+      "words": [
+        {
+          "w": "Vous",
+          "start": 0.642,
+          "end": 0.822
+        },
+        {
+          "w": "voulez",
+          "start": 0.833,
+          "end": 1.103
+        },
+        {
+          "w": "vendre",
+          "start": 1.114,
+          "end": 1.384
+        },
+        {
+          "w": "votre",
+          "start": 1.395,
+          "end": 1.62
+        },
+        {
+          "w": "voiture",
+          "start": 1.632,
+          "end": 1.947
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "text": "Confiez-la à MKZ Motors.",
+      "start": 2.625,
+      "end": 4.544,
+      "words": [
+        {
+          "w": "Confiez-la",
+          "start": 2.637,
+          "end": 3.293
+        },
+        {
+          "w": "à",
+          "start": 3.311,
+          "end": 3.382
+        },
+        {
+          "w": "MKZ",
+          "start": 3.4,
+          "end": 3.953
+        },
+        {
+          "w": "Motors",
+          "start": 3.971,
+          "end": 4.396
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "text": "On l'estime, on crée l'annonce,",
+      "start": 5.125,
+      "end": 6.984,
+      "words": [
+        {
+          "w": "On",
+          "start": 5.137,
+          "end": 5.294
+        },
+        {
+          "w": "l'estime",
+          "start": 5.314,
+          "end": 5.884
+        },
+        {
+          "w": "on",
+          "start": 6.11,
+          "end": 6.212
+        },
+        {
+          "w": "crée",
+          "start": 6.224,
+          "end": 6.428
+        },
+        {
+          "w": "l'annonce",
+          "start": 6.441,
+          "end": 6.861
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "text": "on organise les visites et les essais,",
+      "start": 7.125,
+      "end": 9.064,
+      "words": [
+        {
+          "w": "on",
+          "start": 7.137,
+          "end": 7.252
+        },
+        {
+          "w": "organise",
+          "start": 7.266,
+          "end": 7.726
+        },
+        {
+          "w": "les",
+          "start": 7.74,
+          "end": 7.913
+        },
+        {
+          "w": "visites",
+          "start": 7.927,
+          "end": 8.329
+        },
+        {
+          "w": "et",
+          "start": 8.344,
+          "end": 8.459
+        },
+        {
+          "w": "les",
+          "start": 8.473,
+          "end": 8.645
+        },
+        {
+          "w": "essais",
+          "start": 8.66,
+          "end": 9.005
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "text": "et on gère toutes les démarches.",
+      "start": 9.25,
+      "end": 10.684,
+      "words": [
+        {
+          "w": "et",
+          "start": 9.262,
+          "end": 9.359
+        },
+        {
+          "w": "on",
+          "start": 9.371,
+          "end": 9.469
+        },
+        {
+          "w": "gère",
+          "start": 9.481,
+          "end": 9.675
+        },
+        {
+          "w": "toutes",
+          "start": 9.687,
+          "end": 9.979
+        },
+        {
+          "w": "les",
+          "start": 9.991,
+          "end": 10.137
+        },
+        {
+          "w": "démarches",
+          "start": 10.149,
+          "end": 10.587
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "text": "Le dépôt-vente : on s'occupe de tout.",
+      "start": 11.625,
+      "end": 13.919,
+      "words": [
+        {
+          "w": "Le",
+          "start": 11.637,
+          "end": 11.772
+        },
+        {
+          "w": "dépôt-vente",
+          "start": 11.789,
+          "end": 12.48
+        },
+        {
+          "w": "on",
+          "start": 12.941,
+          "end": 13.055
+        },
+        {
+          "w": "s'occupe",
+          "start": 13.069,
+          "end": 13.481
+        },
+        {
+          "w": "de",
+          "start": 13.495,
+          "end": 13.608
+        },
+        {
+          "w": "tout",
+          "start": 13.623,
+          "end": 13.85
+        }
+      ]
+    },
+    {
+      "id": "s7",
+      "text": "MKZ Motors. On la vend pour vous.",
+      "start": 14.625,
+      "end": 17.189,
+      "words": [
+        {
+          "w": "MKZ",
+          "start": 14.637,
+          "end": 15.263
+        },
+        {
+          "w": "Motors",
+          "start": 15.283,
+          "end": 15.764
+        },
+        {
+          "w": "On",
+          "start": 16.344,
+          "end": 16.436
+        },
+        {
+          "w": "la",
+          "start": 16.447,
+          "end": 16.54
+        },
+        {
+          "w": "vend",
+          "start": 16.551,
+          "end": 16.736
+        },
+        {
+          "w": "pour",
+          "start": 16.747,
+          "end": 16.931
+        },
+        {
+          "w": "vous",
+          "start": 16.943,
+          "end": 17.127
+        }
+      ]
+    }
+  ],
+  "shots": [
+    {
+      "id": "p1",
+      "start": 0,
+      "end": 2.5
+    },
+    {
+      "id": "p2",
+      "start": 2.5,
+      "end": 5
+    },
+    {
+      "id": "p3",
+      "start": 5,
+      "end": 7
+    },
+    {
+      "id": "p4",
+      "start": 7,
+      "end": 9.133333333333333
+    },
+    {
+      "id": "p5",
+      "start": 9.133333333333333,
+      "end": 11.5
+    },
+    {
+      "id": "p6",
+      "start": 11.5,
+      "end": 14.5
+    },
+    {
+      "id": "p7",
+      "start": 14.5,
+      "end": 20
+    }
+  ]
+}
