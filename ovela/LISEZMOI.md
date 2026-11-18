@@ -17,3 +17,12 @@ Ovela est un produit **inventé** : un assistant qui répond aux clients des com
 
     node outils/rendu.mjs images --t 1,3.2,4.6,7.6,9,11.2,13.2,15.2,17.6,19.6 --ech 16 --out storyboard
     python3 outils/planche.py storyboard storyboard/planche.jpg
+
+## Son
+
+Musique originale et bruitages, synthétisés avec numpy (`outils/son.py`), calés sur `scene/instants.js` (les mêmes
+instants que l'image). Sans voix off. Mix final à −14 LUFS (volume des plateformes), crête vraie sous −1 dBFS :
+
+    python3 outils/son.py
+    ffmpeg -i out/mix-brut.wav -af loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json -f null -    # mesure
+    ffmpeg -i out/mix-brut.wav -af "loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=…:measured_TP=…:measured_LRA=…:measured_thresh=…:offset=…:linear=true,alimiter=limit=0.891:level=false" out/mix.wav
