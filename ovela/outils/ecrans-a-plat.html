@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#444;display:flex;flex-wrap:wrap;gap:20px;padding:20px;width:3400px}canvas{background:#000}</style></head><body>
+<script src="../scene/lib.js"></script><script src="../scene/ecrans.js"></script>
+<script>
+const P = { tel: { n: 5, glisse: 1, badge: 37, rep: 2, repG: 1 }, restaurant: { ok: 1 }, boutique: { ok: 1 }, coach: { ok: 1 }, coiffure: { ok: 0 }, fleuriste: { ok: 1 }, stats: { pct: 98, barres: 1, gain: 31 }, avis: { n: 1240 }, barre: { texte: "Une table pour 4 ce soir ?", curseur: 1 }, reponse: {}, notif0: { i: 0 }, notif1: { i: 1, rep: 1 }, etiquette0: { i: 0 }, etiquette2: { i: 2 } };
+window.PRET = (async () => { await Promise.all(POLICES.map((p) => document.fonts.load(p))); await document.fonts.ready;
+  for (const [n, p] of Object.entries(P)) { const [l, h, d] = ECRANS_DEF[n]; const c = document.createElement('canvas'); c.width = l; c.height = h; c.style.width = (l * 0.5) + 'px'; d(c.getContext('2d'), p); document.body.appendChild(c); }
+  return true; })();
+</script></body></html>

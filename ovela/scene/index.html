@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Ovela</title>
+  <style>html, body { margin: 0; background: #000; overflow: hidden; } canvas { display: block; }</style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <script src="lib.js"></script>
+  <script src="moteur.js"></script>
+  <script src="ecrans.js"></script>
+  <script src="film.js"></script>
+  <script>
+    // Paramètres dans l'adresse : w, h (taille de sortie), def (définition de la 3D, 1 = pleine), ech (sous-images par image).
+    const Q = new URLSearchParams(location.search); globalThis.DBG = +(Q.get("dbg") || 0);
+    const LARGEUR = +(Q.get("w") || 1080), HAUTEUR = +(Q.get("h") || 1920), DEF = +(Q.get("def") || 1);
+    const canvas = document.getElementById("c");
+    canvas.style.width = LARGEUR + "px"; canvas.style.height = HAUTEUR + "px";
+    window.PRET = (async () => {
+      await Promise.all(POLICES.map((p) => document.fonts.load(p)));
+      await document.fonts.ready;
+      const M = Moteur.creer(canvas, { largeur: LARGEUR, hauteur: HAUTEUR, definition: DEF });
+      FILM.preparer(M, LARGEUR, HAUTEUR);
+      window.rendre = (t, o = {}) => { M.image(t, FILM, o); M.attendre(); return true; };
+      return true;
+    })();
+  </script>
+</body>
+</html>
