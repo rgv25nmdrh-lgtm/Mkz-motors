@@ -54,7 +54,7 @@ Pillow (`node tools/verifier.mjs` dit ce qui manque).
     node tools/rendu.mjs video --scene scene/apercu.html --fps 30 --dpr 0.5 --workers 4 --bitrate 4000000 --out out/apercu-muet.mp4
     bash outils-rendu/rendu-final.sh    # rendu final en 4 tranches, puis le son → livrables/mkz-motors-voix-off-1080x1920.mp4
 
-Sans carte graphique, l'aperçu prend environ 2 min et le rendu final environ une heure.
+Sans carte graphique, l'aperçu prend environ 2 min et le rendu final environ 45 min (4 tranches de 10 à 11 min).
 
 ## Contrôles
 
