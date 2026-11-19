@@ -61,7 +61,7 @@ avec Pillow (`node tools/verifier.mjs` dit ce qui manque).
     node tools/rendu.mjs video --scene scene/apercu.html --fps 30 --dpr 1 --workers 3 --delai 120 --bitrate 6000000 --out out/apercu-muet.mp4
     bash outils-rendu/rendu-final.sh                         # le rendu final, par tranches de 2 s (voir le script)
 
-Le rendu final sans carte graphique prend environ sept heures (25 s par image) ; avec une carte graphique, quelques
+Le rendu final sans carte graphique prend environ cinq heures (18 s par image) ; avec une carte graphique, quelques
 minutes. Il se fait par tranches de 2 s : relancer le script reprend là où il s'était arrêté. Deux fichiers sortent :
 `livrables/mkz-motors-vitrine-1080x1920.mp4` (40 Mbit/s, le fichier maître) et `livrables/mkz-motors-vitrine-leger.mp4`
 (environ 10 Mbit/s, pour la mise en ligne). Ne pas modifier `scene/` pendant un rendu.

@@ -204,13 +204,15 @@ const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120, RAYON
 let CALQUE = null;
 window.__seek = (t) => { t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT, rayons: RAYONS }); M.attendre(); titres(CALQUE, t); };
 window.__ready = false;
-Promise.all([POLICES_PRETES, VITRINE.charger()]).then(() => {   // les polices, le logo, les photos des véhicules
+// La mise en route (moteur, textures) est lourde sans carte graphique : elle attend la fin du chargement de la page,
+// sinon elle le retarde, et l'outil de rendu, qui attend ce chargement 60 s au plus, abandonne.
+const PAGE_CHARGEE = new Promise((ok) => (document.readyState === "complete" ? ok() : window.addEventListener("load", ok, { once: true }))).then(() => new Promise((ok) => setTimeout(ok, 50)));
+Promise.all([POLICES_PRETES, VITRINE.charger(), PAGE_CHARGEE]).then(() => {   // les polices, le logo, les photos des véhicules
   const plateau = document.getElementById("plateau");
   const DEF = window.DEFINITION || 1;   // définition du rendu 3D (0,75 : les trois quarts des pixels de côté, l'image est agrandie)
   const cv = document.createElement("canvas"); cv.width = Math.round(W * DEF); cv.height = Math.round(H * DEF); cv.style.width = W + "px"; cv.style.height = H + "px"; plateau.appendChild(cv);
   const cq = document.createElement("canvas"); cq.width = W; cq.height = H; plateau.appendChild(cq); CALQUE = cq.getContext("2d");   // le calque des titres
   M = Moteur.creer(cv, { largeur: cv.width, hauteur: cv.height, couches: 4, texL: TL, texH: TH });
-  texturesFixes(); textures(0);
-  window.__seek(0);
+  texturesFixes(); textures(0);   // pas d'image d'échauffement : la première image demandée la calcule
   window.__ready = true;
 });
