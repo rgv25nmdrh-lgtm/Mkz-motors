@@ -9,12 +9,12 @@ const ICI = path.dirname(fileURLToPath(import.meta.url)), PROJET = path.dirname(
 const [nom, liste, dpr = '0.5'] = process.argv.slice(2);
 if (!nom || !liste) { console.error('usage : node tools/essai.mjs nom 0.4,0.95,1.6 [0.5]'); process.exit(2); }
 const temps = liste.split(',').map(Number), dossier = path.join(PROJET, 'out', nom), image = (t) => path.join(dossier, `t${t.toFixed(2).padStart(5, '0')}.jpg`);
-const LIMITE = +(process.env.ESSAI_LIMITE_MS || 100000);   // un lot qui dépasse cette durée est arrêté et relancé
+const LIMITE = +(process.env.ESSAI_LIMITE_MS || 900000);   // un lot qui dépasse cette durée est arrêté et relancé (sans carte graphique, une image de qualité finale prend plus d'une minute)
 fs.mkdirSync(dossier, { recursive: true });
 for (let i = 0; i < temps.length; i += 3) {
   const lot = temps.slice(i, i + 3).join(','); let fait = false;
   for (let essai = 0; essai < 4 && !fait; essai++) {
-    const r = await lancerAvecLimite(process.execPath, [path.join(ICI, 'rendu.mjs'), 'stills', '--scene', 'scene/index.html', '--times', lot, '--dpr', dpr, '--dir', path.join('out', nom)], { cwd: PROJET, limite: LIMITE });
+    const r = await lancerAvecLimite(process.execPath, [path.join(ICI, 'rendu.mjs'), 'stills', '--scene', 'scene/index.html', '--times', lot, '--dpr', dpr, '--delai', process.env.ESSAI_DELAI || '300', '--dir', path.join('out', nom)], { cwd: PROJET, limite: LIMITE });
     if (r.bloque) { console.log('lot', lot, 'bloqué, relancé'); continue; }
     if (r.code !== 0 || /erreurs de page/.test(r.sortie)) { console.error('échec du lot', lot, r.sortie.slice(0, 1500)); process.exit(1); }
     fait = true;

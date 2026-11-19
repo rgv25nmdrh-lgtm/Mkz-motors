@@ -8,11 +8,11 @@ for _flux in (sys.stdout, sys.stderr):   # Windows : une sortie redirigée n'est
     except Exception: pass
 ICI = os.path.dirname(os.path.abspath(__file__)); PROJET = os.path.dirname(ICI); DOSSIER = os.path.join(PROJET, "out", "storyboard")
 PARTIES = [
-  ("1 · La plaque (mesure 1, de 0 à 2 s)", [(0.3, "On tape sa plaque"), (0.9, "AB-123-C…"), (1.3, "Reconnue : la citadine"), (1.7, "Très gros plan : Estimer")]),
-  ("2 · Le couloir (mesure 2, de 2 à 4 s)", [(2.6, "On file entre les voitures"), (3.2, "L'estimation monte"), (3.8, "11 900 € : bloqué, tenu")]),
+  ("1 · La plaque (mesure 1, de 0 à 2 s)", [(0.3, "On tape sa plaque"), (0.9, "AB-123-C…"), (1.3, "Reconnue : la Peugeot 208"), (1.7, "Très gros plan : Estimer")]),
+  ("2 · Le couloir (mesure 2, de 2 à 4 s)", [(2.6, "On file entre les photos"), (3.2, "L'estimation monte"), (3.8, "9 600 € : bloqué, tenu")]),
   ("3 · Les six étapes (mesures 3 et 4, de 4 à 8 s)", [(4.2, "Elles sortent du sol"), (4.75, "01 · Estimation"), (5.25, "02 · Photos pro"), (5.75, "03 · Annonce en ligne"),
     (6.25, "04 · Essais"), (6.75, "05 · Paiement sécurisé"), (7.25, "06 · Démarches"), (7.75, "Toutes, de haut")]),
-  ("4 · Le mur (mesure 5, de 8 à 10 s)", [(8.3, "Les voitures vendues"), (8.8, "La caméra le balaie"), (9.7, "« Et vous ? Rien à faire. »")]),
+  ("4 · Le mur (mesure 5, de 8 à 10 s)", [(8.3, "Les vraies voitures MKZ"), (8.8, "La caméra le balaie"), (9.7, "« Et vous ? Rien à faire. »")]),
   ("5 · Les chiffres (mesure 6, de 10 à 12 s)", [(10.2, "0 appel à gérer"), (10.7, "0 visite chez vous"), (11.2, "1 virement, c'est tout"), (11.8, "Les trois, tenus")]),
   ("6 · La boucle (mesure 7, de 12 à 14 s)", [(12.3, "Déposez"), (12.8, "On vend"), (13.3, "Vous encaissez"), (13.8, "La pastille s'envole")]),
   ("7 · Le logo (mesure 8, de 14 à 16 s)", [(14.3, "Le logo, Dépôt-vente"), (14.8, "La phrase"), (15.6, "Tenu")]),

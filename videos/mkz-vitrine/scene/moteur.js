@@ -35,7 +35,7 @@
 const Moteur = (() => {
   "use strict";
   const NB = 24, NS = 6, NL = 4, NE = 3, KB = 15, KS = 6, NIV_BLOOM = 6, MAX_POUSSIERES = 1600;
-  const TU = 48, TUX = 64, TUY = 32;   // tuiles de tri des boîtes : taille en px, taille de la table
+  const TU = 48, TUX = 64, TUY = 64;   // tuiles de tri des boîtes : taille en px, taille de la table (64 × 48 = 3072 px : assez pour la Story en 1080 × 1920 ; 32 coupait le haut de l'image)
   const RAD = Math.PI / 180;
 
   // ---------------------------------------------------------------- petits outils

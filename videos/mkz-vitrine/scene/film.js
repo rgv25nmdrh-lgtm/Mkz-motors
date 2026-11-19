@@ -204,7 +204,7 @@ const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120, RAYON
 let CALQUE = null;
 window.__seek = (t) => { t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT, rayons: RAYONS }); M.attendre(); titres(CALQUE, t); };
 window.__ready = false;
-POLICES_PRETES.then(() => {
+Promise.all([POLICES_PRETES, VITRINE.charger()]).then(() => {   // les polices, le logo, les photos des véhicules
   const plateau = document.getElementById("plateau");
   const DEF = window.DEFINITION || 1;   // définition du rendu 3D (0,75 : les trois quarts des pixels de côté, l'image est agrandie)
   const cv = document.createElement("canvas"); cv.width = Math.round(W * DEF); cv.height = Math.round(H * DEF); cv.style.width = W + "px"; cv.style.height = H + "px"; plateau.appendChild(cv);

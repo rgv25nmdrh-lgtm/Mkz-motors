@@ -1,8 +1,10 @@
-// MKZ Motors, la vitrine du dépôt-vente : tout ce qui est dessiné sur canevas. Rien n'est chargé, sauf le logo.
+// MKZ Motors, la vitrine du dépôt-vente : tout ce qui est dessiné sur canevas, et les vraies photos des véhicules.
 // Les six écrans montrent les six étapes du dépôt-vente, animées image par image (48 images à 12 par seconde,
 // de 4 à 8 s) : l'estimation, les photos, l'annonce, l'essai, le paiement, les démarches.
-// Chaque dessin est une fonction pure de ses paramètres.
-// LES DONNÉES SONT DES EXEMPLES (plaque, voiture, prix, vues, voitures du mur) : à remplacer avant diffusion.
+// Les photos (scene/img/) sont celles des véhicules en vente sur la boutique mkzmotors.com : la Peugeot 208 Diesel
+// 2020 (9 600 €), le héros de la vidéo, et la Fiat 500X Lounge Diesel 2015 (7 600 €, 144 000 km).
+// Chaque dessin est une fonction pure de ses paramètres. Restent des exemples : la plaque tapée (AB-123-CD), la
+// demande d'essai du jeudi 18:30, le trajet de l'essai.
 (() => {
   const blanc = (a) => `rgba(242,242,239,${a})`, rouge = (a) => `rgba(250,15,20,${a})`;
   const verre = (ctx, L, Hh, r, bord = blanc(0.3), ep = 5) => bloc(ctx, ep, ep, L - 2 * ep, Hh - 2 * ep, r, "rgba(15,15,18,0.94)", bord, ep);
@@ -19,58 +21,34 @@
     return tot;
   }
 
-  // ------------------------------------------------------------------ les données (des exemples)
-  const PLAQUE = "AB123CD", MODELE = "Citadine", ANNEE = "2019", KM = "68 000 km", PRIX = 11900;
-  const VOITURE = `${MODELE} · ${ANNEE} · ${KM}`;
+  // ------------------------------------------------------------------ les données (la boutique mkzmotors.com)
+  const PLAQUE = "AB123CD", MODELE = "Peugeot 208", ANNEE = "2020", PRIX = 9600;
+  const VOITURE = `${MODELE} · ${ANNEE} · Diesel`;
   const plaqueTexte = (s) => s.slice(0, 2) + (s.length >= 2 ? "-" : "") + s.slice(2, 5) + (s.length >= 5 ? "-" : "") + s.slice(5, 7);
   const ETAPES = ["Estimation", "Photos pro", "Annonce en ligne", "Essais", "Paiement sécurisé", "Démarches"];
-  // le mur : des voitures déjà vendues (type, année, km, prix, teinte de la carrosserie)
-  const VENDUES = [["Break", 2018, "112 000 km", 9400, "#3c3f47"], ["SUV", 2020, "54 000 km", 18900, "#e6e6e2"], ["Compacte", 2021, "31 000 km", 15500, "#8a1418"],
-    ["Citadine", 2017, "89 000 km", 7900, "#c9cbd0"], ["Monospace", 2016, "126 000 km", 8700, "#5d616b"], ["Berline", 2019, "77 000 km", 13600, "#17171b"]];
-  globalThis.VITRINE = { PRIX, ETAPES, N: 48 };
-
-  // ------------------------------------------------------------------ une voiture de profil (vers la droite)
-  // x, y : coin haut gauche ; l : longueur ; o : { teinte (carrosserie), miroir }. Hauteur totale : 0,39 l.
-  function voiture(ctx, x, y, l, o = {}) {
-    const teinte = o.teinte || "#cfd1d6";
-    ctx.save(); ctx.translate(x, y); if (o.miroir) { ctx.translate(l, 0); ctx.scale(-1, 1); } ctx.scale(l, l); ctx.lineJoin = "round"; ctx.lineCap = "round";
-    // l'ombre au sol
-    ctx.save(); ctx.translate(0.5, 0.385); ctx.scale(1, 0.06); const go = ctx.createRadialGradient(0, 0, 0, 0, 0, 0.56); go.addColorStop(0, "rgba(0,0,0,0.75)"); go.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = go; ctx.beginPath(); ctx.arc(0, 0, 0.56, 0, 7); ctx.fill(); ctx.restore();
-    // la carrosserie
-    const corps = () => {
-      ctx.beginPath(); ctx.moveTo(0.04, 0.3); ctx.lineTo(0.022, 0.286); ctx.lineTo(0.018, 0.205); ctx.quadraticCurveTo(0.02, 0.162, 0.046, 0.136); ctx.lineTo(0.118, 0.066);
-      ctx.quadraticCurveTo(0.14, 0.044, 0.19, 0.041); ctx.lineTo(0.44, 0.037); ctx.quadraticCurveTo(0.49, 0.037, 0.532, 0.07); ctx.lineTo(0.628, 0.136);
-      ctx.quadraticCurveTo(0.65, 0.149, 0.69, 0.153); ctx.lineTo(0.9, 0.168); ctx.quadraticCurveTo(0.96, 0.176, 0.975, 0.21); ctx.lineTo(0.982, 0.265);
-      ctx.quadraticCurveTo(0.982, 0.295, 0.96, 0.3); ctx.lineTo(0.895, 0.3); ctx.arc(0.79, 0.3, 0.105, 0, Math.PI, true); ctx.lineTo(0.315, 0.3); ctx.arc(0.21, 0.3, 0.105, 0, Math.PI, true); ctx.closePath();
-    };
-    corps(); ctx.fillStyle = teinte; ctx.fill();
-    const gc = ctx.createLinearGradient(0, 0.04, 0, 0.3); gc.addColorStop(0, "rgba(255,255,255,0.32)"); gc.addColorStop(0.42, "rgba(255,255,255,0.06)"); gc.addColorStop(0.5, "rgba(0,0,0,0.12)"); gc.addColorStop(1, "rgba(0,0,0,0.5)");
-    ctx.fillStyle = gc; ctx.fill(); ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 0.004; ctx.stroke();
-    // les vitres (custode, vitre arrière, vitre avant)
-    const gv = ctx.createLinearGradient(0, 0.05, 0, 0.13); gv.addColorStop(0, "#2b2f38"); gv.addColorStop(1, "#0b0c10"); ctx.fillStyle = gv;
-    ctx.beginPath(); ctx.moveTo(0.088, 0.13); ctx.lineTo(0.128, 0.078); ctx.quadraticCurveTo(0.14, 0.062, 0.158, 0.058); ctx.lineTo(0.168, 0.13); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(0.205, 0.055); ctx.lineTo(0.36, 0.052); ctx.lineTo(0.36, 0.13); ctx.lineTo(0.188, 0.13); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(0.38, 0.052); ctx.lineTo(0.44, 0.051); ctx.quadraticCurveTo(0.482, 0.052, 0.515, 0.08); ctx.lineTo(0.594, 0.13); ctx.lineTo(0.38, 0.13); ctx.closePath(); ctx.fill();
-    ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(0.25, 0.054); ctx.lineTo(0.3, 0.053); ctx.lineTo(0.255, 0.13); ctx.lineTo(0.205, 0.13); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(0.43, 0.051); ctx.lineTo(0.462, 0.052); ctx.lineTo(0.425, 0.13); ctx.lineTo(0.393, 0.13); ctx.closePath(); ctx.fill(); ctx.restore();
-    // portières, poignées, rétroviseur, ligne de caisse
-    ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 0.004;
-    ctx.beginPath(); ctx.moveTo(0.37, 0.132); ctx.lineTo(0.372, 0.29); ctx.moveTo(0.606, 0.138); ctx.quadraticCurveTo(0.625, 0.2, 0.616, 0.262); ctx.moveTo(0.178, 0.132); ctx.quadraticCurveTo(0.16, 0.2, 0.17, 0.235); ctx.stroke();
-    ctx.fillStyle = "rgba(0,0,0,0.45)"; rrect(ctx, 0.31, 0.158, 0.04, 0.009, 0.004); ctx.fill(); rrect(ctx, 0.545, 0.158, 0.04, 0.009, 0.004); ctx.fill();
-    ctx.fillStyle = teinte; ctx.beginPath(); ctx.moveTo(0.578, 0.122); ctx.lineTo(0.618, 0.114); ctx.lineTo(0.625, 0.138); ctx.lineTo(0.59, 0.14); ctx.closePath(); ctx.fill(); ctx.strokeStyle = "rgba(0,0,0,0.5)"; ctx.stroke();
-    ctx.strokeStyle = "rgba(255,255,255,0.22)"; ctx.lineWidth = 0.003; ctx.beginPath(); ctx.moveTo(0.04, 0.186); ctx.quadraticCurveTo(0.5, 0.176, 0.95, 0.196); ctx.stroke();
-    // les feux : avant blanc, arrière rouge
-    ctx.fillStyle = "#f6f3e8"; ctx.beginPath(); ctx.moveTo(0.925, 0.172); ctx.lineTo(0.966, 0.186); ctx.lineTo(0.972, 0.206); ctx.lineTo(0.93, 0.196); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = C.accent; ctx.beginPath(); ctx.moveTo(0.02, 0.152); ctx.lineTo(0.046, 0.128); ctx.lineTo(0.05, 0.165); ctx.lineTo(0.021, 0.178); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = "#0c0c0e"; rrect(ctx, 0.022, 0.255, 0.07, 0.03, 0.01); ctx.fill(); rrect(ctx, 0.9, 0.255, 0.082, 0.03, 0.01); ctx.fill();
-    // les roues
-    [0.21, 0.79].forEach((cx) => {
-      ctx.fillStyle = "#08080a"; ctx.beginPath(); ctx.arc(cx, 0.3, 0.083, 0, 7); ctx.fill();
-      const gr = ctx.createRadialGradient(cx - 0.015, 0.285, 0.005, cx, 0.3, 0.055); gr.addColorStop(0, "#e9e9e6"); gr.addColorStop(1, "#7d7f86"); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, 0.3, 0.052, 0, 7); ctx.fill();
-      ctx.strokeStyle = "#2a2b30"; ctx.lineWidth = 0.008; ctx.beginPath(); for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k * 2 * Math.PI) / 5; ctx.moveTo(cx + 0.016 * Math.cos(a), 0.3 + 0.016 * Math.sin(a)); ctx.lineTo(cx + 0.046 * Math.cos(a), 0.3 + 0.046 * Math.sin(a)); } ctx.stroke();
-      ctx.fillStyle = "#2a2b30"; ctx.beginPath(); ctx.arc(cx, 0.3, 0.013, 0, 7); ctx.fill();
-    });
-    ctx.restore();
+  // les véhicules en vente (leur fiche sur le mur et dans le couloir)
+  const VEHICULES = [
+    { nom: "Peugeot 208", annee: 2020, details: "Diesel · Manuelle · Gris", prix: 9600, photo: "208-avant" },
+    { nom: "Fiat 500X Lounge", annee: 2015, details: "Diesel · 144 000 km", prix: 7600, photo: "500x-avant" },
+  ];
+  // les photos (900 × 1600) : centre de la voiture (x, y de 0 à 1) et part de la largeur qu'elle occupe (1 : intérieur)
+  const PHOTOS = {
+    "208-avant": [0.52, 0.52, 0.84], "208-arriere": [0.5, 0.5, 0.84], "208-profil": [0.5, 0.52, 0.94], "208-tableau": [0.5, 0.5, 1], "208-banquette": [0.5, 0.5, 1],
+    "500x-avant": [0.5, 0.665, 0.98], "500x-arriere": [0.5, 0.66, 0.98], "500x-profil": [0.5, 0.515, 0.86], "500x-tableau": [0.5, 0.5, 1], "500x-banquette": [0.5, 0.5, 1],
+  };
+  const IMG = {};
+  globalThis.VITRINE = { PRIX, ETAPES, N: 48,
+    charger: () => Promise.all(Object.keys(PHOTOS).map((nom) => new Promise((ok, ko) => { const im = new Image(); im.onload = ok; im.onerror = () => ko(new Error("photo manquante : " + nom)); im.src = `img/${nom}.jpg`; IMG[nom] = im; }))) };
+  // une photo recadrée pour remplir le rectangle (x, y, l, h), centrée sur la voiture. o : { part (largeur de la
+  // voiture dans le cadre, 0,9 par défaut), zoom (1 par défaut), r (coins arrondis) }
+  function photo(ctx, nom, x, y, l, h, o = {}) {
+    const im = IMG[nom]; if (!im || !im.width) return;
+    const [cx, cy, lv] = PHOTOS[nom], W0 = im.width, H0 = im.height;
+    let sw = Math.min(W0, (lv * W0) / (o.part ?? 0.9)), sh = (sw * h) / l;
+    if (sh > H0) { sh = H0; sw = (sh * l) / h; }
+    sw /= o.zoom ?? 1; sh /= o.zoom ?? 1;
+    const sx = clamp(cx * W0 - sw / 2, 0, W0 - sw), sy = clamp(cy * H0 - sh / 2, 0, H0 - sh);
+    ctx.save(); if (o.r) { rrect(ctx, x, y, l, h, o.r); ctx.clip(); } ctx.drawImage(im, sx, sy, sw, sh, x, y, l, h); ctx.restore();
   }
 
   // ------------------------------------------------------------------ petits dessins communs
@@ -99,62 +77,56 @@
     const o = { taille: 54, graisse: 600, serre: -0.03 }; texte(ctx, titre, 34, 186, { ...o, taille: ajuste(ctx, titre, o, 470) });
     if (sous) { const o2 = { taille: 28, couleur: C.doux }; texte(ctx, sous, 36, 232, { ...o2, taille: ajuste(ctx, sous, o2, 470) }); }
   }
-  function studio(ctx, x, y, w, h, r) {                 // un fond de studio photo : une lueur, un sol
-    ctx.save(); rrect(ctx, x, y, w, h, r); ctx.clip();
-    const g = ctx.createRadialGradient(x + w / 2, y + h * 0.42, 10, x + w / 2, y + h * 0.5, w * 0.75); g.addColorStop(0, "#3a3a42"); g.addColorStop(1, "#121216"); ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
-    const s = ctx.createLinearGradient(0, y + h * 0.66, 0, y + h); s.addColorStop(0, "rgba(255,255,255,0.07)"); s.addColorStop(1, "rgba(0,0,0,0.3)"); ctx.fillStyle = s; ctx.fillRect(x, y + h * 0.66, w, h * 0.34);
-    ctx.restore();
-  }
 
   // ------------------------------------------------------------------ les six écrans (u : secondes depuis le début, de 0 à 3,92)
   const ECRANS = [
-    // 1 · l'estimation : la jauge monte, le prix se compte, se bloque
+    // 1 · l'estimation : la 208 de profil ; la jauge monte, le prix se compte, se bloque
     (ctx, u) => {
       entete(ctx, 1); titreEcran(ctx, "Estimation", `${plaqueTexte(PLAQUE)} · ${MODELE} ${ANNEE}`);
-      voiture(ctx, 50, 282, 440);
-      const p = E.outCubic(prog(u, 0.05, 0.95)), cx = 270, cy = 760, r = 170, a0 = Math.PI, a1 = Math.PI * (1 + 0.72 * p);
+      photo(ctx, "208-profil", 30, 258, 480, 250, { r: 22, part: 0.92 });
+      const p = E.outCubic(prog(u, 0.05, 0.95)), cx = 270, cy = 770, r = 170, a0 = Math.PI, a1 = Math.PI * (1 + 0.72 * p);
       ctx.lineCap = "round"; ctx.lineWidth = 24; ctx.strokeStyle = C.ligne2; ctx.beginPath(); ctx.arc(cx, cy, r, a0, 2 * Math.PI); ctx.stroke();
       ctx.strokeStyle = C.accent; ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1); ctx.stroke();
       ctx.strokeStyle = blanc(0.35); ctx.lineWidth = 3; for (let k = 0; k <= 10; k++) { const a = Math.PI * (1 + k / 10); ctx.beginPath(); ctx.moveTo(cx + (r - 30) * Math.cos(a), cy + (r - 30) * Math.sin(a)); ctx.lineTo(cx + (r - 44) * Math.cos(a), cy + (r - 44) * Math.sin(a)); ctx.stroke(); }
       ctx.strokeStyle = C.texte; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + (r - 52) * Math.cos(a1), cy + (r - 52) * Math.sin(a1)); ctx.stroke();
       ctx.fillStyle = C.texte; ctx.beginPath(); ctx.arc(cx, cy, 13, 0, 7); ctx.fill();
-      prix(ctx, Math.round((PRIX * p) / 100) * 100, cx, 862, { taille: 80, graisse: 600, align: "center", couleur: p >= 0.999 ? C.accent : C.texte });
-      texte(ctx, `${KM} · prix conseillé`, cx, 914, { taille: 27, couleur: C.doux, align: "center" });
+      prix(ctx, Math.round((PRIX * p) / 100) * 100, cx, 866, { taille: 80, graisse: 600, align: "center", couleur: p >= 0.999 ? C.accent : C.texte });
+      texte(ctx, "Diesel · Manuelle · prix conseillé", cx, 916, { taille: 27, couleur: C.doux, align: "center" });
     },
-    // 2 · les photos : le flash, les vignettes qui se remplissent
+    // 2 · les photos : le viseur montre les vraies photos de la 208, une par éclair ; les vignettes se remplissent
     (ctx, u) => {
       entete(ctx, 2); titreEcran(ctx, "Photos pro", "En studio, sous tous les angles");
-      const x = 30, y = 268, w = 480, h = 330, flashs = Array.from({ length: 8 }, (_, k) => 0.15 + 0.42 * k), n = compte(flashs, u);
-      studio(ctx, x, y, w, h, 22); voiture(ctx, 66, 372, 408);
-      ctx.strokeStyle = blanc(0.85); ctx.lineWidth = 4; ctx.lineCap = "square";
+      const VUES = ["208-avant", "208-profil", "208-arriere", "208-tableau", "208-banquette"], flashs = VUES.map((_, k) => 0.2 + 0.5 * k), n = compte(flashs, u);
+      const x = 30, y = 258, w = 480, h = 480, vue = n >= VUES.length && u > flashs[VUES.length - 1] + 0.7 ? VUES[0] : VUES[Math.min(n, VUES.length - 1)];   // à la fin, le viseur revient sur l'avant
+      ctx.fillStyle = "#1a1a1e"; rrect(ctx, x, y, w, h, 22); ctx.fill();
+      photo(ctx, vue, x, y, w, h, { r: 22, part: vue.includes("tableau") || vue.includes("banquette") ? 1 : 0.86, zoom: 1 + 0.04 * prog(u, flashs[Math.max(0, n - 1)] || 0, 0.5) });
+      ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 4; ctx.lineCap = "square";
       [[x + 18, y + 18, 1, 1], [x + w - 18, y + 18, -1, 1], [x + 18, y + h - 18, 1, -1], [x + w - 18, y + h - 18, -1, -1]].forEach(([a, b, sx, sy]) => { ctx.beginPath(); ctx.moveTo(a, b + 36 * sy); ctx.lineTo(a, b); ctx.lineTo(a + 36 * sx, b); ctx.stroke(); });
-      ctx.fillStyle = C.accent; ctx.beginPath(); ctx.arc(x + 44, y + 52, 9, 0, 7); ctx.fill(); texte(ctx, `${String(n * 3).padStart(2, "0")} / 24`, x + 62, y + 62, { taille: 26, mono: true });
+      bloc(ctx, x + 30, y + 30, 150, 44, 22, "rgba(10,10,12,0.7)"); ctx.fillStyle = C.accent; ctx.beginPath(); ctx.arc(x + 54, y + 52, 9, 0, 7); ctx.fill();
+      texte(ctx, `${String(n).padStart(2, "0")} / 05`, x + 72, y + 62, { taille: 26, mono: true, couleur: "#ffffff" });
       const f = flashs.reduce((m, tf) => Math.max(m, impulsion(u, tf, 0.09)), 0); if (f > 0.01) { ctx.save(); rrect(ctx, x, y, w, h, 22); ctx.clip(); ctx.fillStyle = `rgba(255,255,255,${(0.9 * f).toFixed(3)})`; ctx.fillRect(x, y, w, h); ctx.restore(); }
-      for (let k = 0; k < 8; k++) {
-        const tx = 30 + (k % 4) * 123, ty = 630 + Math.floor(k / 4) * 92, fait = k < n;
-        if (fait) { studio(ctx, tx, ty, 111, 80, 10); voiture(ctx, tx + 8, ty + 24, 95, { miroir: k % 2 }); }
-        else { ctx.setLineDash([8, 7]); bloc(ctx, tx + 1, ty + 1, 109, 78, 10, null, C.ligne2, 2); ctx.setLineDash([]); }
-      }
-      if (n >= 8) { coche(ctx, 52, 880, 20); texte(ctx, "Prêtes pour l’annonce", 84, 891, { taille: 30, graisse: 600, couleur: C.accent }); }
-      else texte(ctx, "Prise de vue…", 36, 891, { taille: 30, couleur: C.doux });
+      VUES.forEach((v, k) => {
+        const tx = 30 + k * 98, ty = 760, fait = k < n;
+        if (fait) photo(ctx, v, tx, ty, 88, 110, { r: 12, part: v.includes("tableau") || v.includes("banquette") ? 1 : 0.95 });
+        else { ctx.setLineDash([8, 7]); bloc(ctx, tx + 1, ty + 1, 86, 108, 12, null, C.ligne2, 2); ctx.setLineDash([]); }
+      });
+      if (n >= VUES.length) { coche(ctx, 52, 910, 20); texte(ctx, "Prêtes pour l’annonce", 84, 921, { taille: 30, graisse: 600, couleur: C.accent }); }
+      else texte(ctx, "Prise de vue…", 36, 921, { taille: 30, couleur: C.doux });
     },
-    // 3 · l'annonce : en ligne, les vues montent, une demande d'essai arrive
+    // 3 · l'annonce : la vraie fiche de la 208, en ligne ; une demande d'essai arrive
     (ctx, u) => {
       entete(ctx, 3);
-      studio(ctx, 24, 128, 492, 300, 22); voiture(ctx, 60, 226, 420);
+      const VUES = ["208-avant", "208-arriere", "208-profil"], iv = Math.floor(u / 1.1) % VUES.length;
+      photo(ctx, VUES[iv], 24, 128, 492, 330, { r: 22, part: 0.86 });
       const pulse = 0.5 + 0.5 * Math.sin(u * 7); bloc(ctx, 42, 146, 170, 46, 23, C.accent); ctx.fillStyle = `rgba(255,255,255,${(0.6 + 0.4 * pulse).toFixed(3)})`; ctx.beginPath(); ctx.arc(66, 169, 7, 0, 7); ctx.fill();
       texte(ctx, "EN LIGNE", 84, 179, { taille: 24, mono: true, graisse: 600, couleur: "#ffffff" });
-      [0, 1, 2, 3, 4].forEach((k) => { ctx.fillStyle = k === 0 ? C.texte : C.ligne2; ctx.beginPath(); ctx.arc(232 + k * 19, 448, 5, 0, 7); ctx.fill(); });
-      texte(ctx, `${MODELE} · ${ANNEE}`, 30, 518, { taille: 46, graisse: 600, serre: -0.03 });
-      texte(ctx, `${KM} · Essence · Manuelle`, 30, 562, { taille: 27, couleur: C.doux });
-      prix(ctx, PRIX, 30, 642, { taille: 66, graisse: 600, couleur: C.accent });
-      const vues = Math.floor(1248 * E.outCubic(prog(u, 0, 3.6))), coeurs = Math.floor(37 * E.outCubic(prog(u, 0.3, 3.2)));
-      ctx.strokeStyle = C.doux; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(48, 700, 17, 11, 0, 0, 7); ctx.stroke(); ctx.fillStyle = C.doux; ctx.beginPath(); ctx.arc(48, 700, 5, 0, 7); ctx.fill();
-      texte(ctx, `${milliers(vues)} vues`, 76, 710, { taille: 28, mono: true, couleur: C.texte });
-      ctx.fillStyle = C.accent; ctx.beginPath(); ctx.moveTo(318, 712); ctx.bezierCurveTo(296, 696, 300, 684, 310, 684); ctx.bezierCurveTo(316, 684, 318, 690, 318, 692); ctx.bezierCurveTo(318, 690, 320, 684, 326, 684); ctx.bezierCurveTo(336, 684, 340, 696, 318, 712); ctx.fill();
-      texte(ctx, `${coeurs} favoris`, 348, 710, { taille: 28, mono: true, couleur: C.texte });
+      [0, 1, 2].forEach((k) => { ctx.fillStyle = k === iv ? C.texte : C.ligne2; ctx.beginPath(); ctx.arc(251 + k * 19, 478, 5, 0, 7); ctx.fill(); });
+      texte(ctx, `${MODELE} · ${ANNEE}`, 30, 548, { taille: 46, graisse: 600, serre: -0.03 });
+      texte(ctx, "Diesel · Manuelle · Gris", 30, 592, { taille: 27, couleur: C.doux });
+      prix(ctx, PRIX, 30, 672, { taille: 66, graisse: 600, couleur: C.accent });
+      bloc(ctx, 30, 700, 250, 46, 23, null, C.ligne2, 2); coche(ctx, 54, 723, 13); texte(ctx, "Garantie 3 mois", 74, 732, { taille: 24, graisse: 600 });
       const s = E.outBack(prog(u, 1.7, 0.35), 1.4); if (s > 0) {
-        const y = lerp(990, 770, s); bloc(ctx, 24, y, 492, 140, 26, C.surface2, C.accent, 4);
+        const y = lerp(990, 786, s); bloc(ctx, 24, y, 492, 140, 26, C.surface2, C.accent, 4);
         bloc(ctx, 46, y + 30, 80, 80, 18, rouge(0.16)); ctx.strokeStyle = C.accent; ctx.lineWidth = 4; rrect(ctx, 62, y + 50, 48, 44, 6); ctx.stroke(); ctx.beginPath(); ctx.moveTo(62, y + 62); ctx.lineTo(110, y + 62); ctx.moveTo(74, y + 44); ctx.lineTo(74, y + 54); ctx.moveTo(98, y + 44); ctx.lineTo(98, y + 54); ctx.stroke();
         texte(ctx, "Demande d’essai", 146, y + 64, { taille: 32, graisse: 600 }); texte(ctx, "Jeudi 18:30", 146, y + 104, { taille: 27, couleur: C.doux });
       }
@@ -213,22 +185,27 @@
       }
     },
   ];
-  // une voiture déjà vendue (le mur et le couloir) : sa fiche, et le tampon « Vendue »
-  function vendue(ctx, i) {
-    const [type, an, km, montant, teinte] = VENDUES[i % VENDUES.length];
-    entete(ctx, 0); studio(ctx, 24, 128, 492, 300, 22); voiture(ctx, 60, 226, 420, { teinte, miroir: i % 2 });
-    texte(ctx, `${type} · ${an}`, 30, 518, { taille: 46, graisse: 600, serre: -0.03 }); texte(ctx, km, 30, 562, { taille: 27, couleur: C.doux });
-    prix(ctx, montant, 30, 642, { taille: 66, graisse: 600, couleur: C.texte });
-    ctx.save(); ctx.translate(270, 790); ctx.rotate(-0.14); bloc(ctx, -170, -62, 340, 124, 18, rouge(0.1), C.accent, 8); texte(ctx, "VENDUE", 0, 26, { taille: 76, graisse: 700, mono: true, align: "center", couleur: C.accent }); ctx.restore();
+  // la fiche d'un véhicule en vente (le mur et le couloir) : sa photo, son prix, « En vitrine »
+  function fiche(ctx, i) {
+    const v = VEHICULES[i % VEHICULES.length];
+    entete(ctx, 0); photo(ctx, v.photo, 24, 128, 492, 420, { r: 22, part: 0.88 });
+    bloc(ctx, 42, 146, 210, 46, 23, C.accent); texte(ctx, "EN VITRINE", 147, 179, { taille: 24, mono: true, graisse: 600, couleur: "#ffffff", align: "center" });
+    texte(ctx, `${v.nom} · ${v.annee}`, 30, 630, { taille: 44, graisse: 600, serre: -0.03 }); texte(ctx, v.details, 30, 676, { taille: 27, couleur: C.doux });
+    prix(ctx, v.prix, 30, 770, { taille: 72, graisse: 600, couleur: C.accent });
+    texte(ctx, "Disponible chez MKZ Motors", 30, 880, { taille: 28, couleur: C.doux });
   }
   // les écrans sont dessinés en 720 × 1280 (4/3 de leur repère de 540 × 960) : leurs textes restent nets en gros plan
-ECRANS.forEach((f, i) => definirTexture("ecran" + i, { l: 720, h: 1280, dessiner(ctx, p = {}) { ctx.scale(4 / 3, 4 / 3); f(ctx, (p.k || 0) / 12); } }));
-  // une vignette du mur : l'écran n (0 à 5, à sa dernière image) ou une voiture vendue (6 et plus)
-  const vignette = (ctx, n, x, y, l) => { ctx.save(); ctx.translate(x, y); rrect(ctx, 0, 0, l, (l * 960) / 540, l * 0.05); ctx.clip(); ctx.scale(l / 540, l / 540); if (n < 6) ECRANS[n](ctx, 47 / 12); else vendue(ctx, n - 6); ctx.restore(); };
+  ECRANS.forEach((f, i) => definirTexture("ecran" + i, { l: 720, h: 1280, dessiner(ctx, p = {}) { ctx.scale(4 / 3, 4 / 3); f(ctx, (p.k || 0) / 12); } }));
+  // une vignette : "e0" à "e5" (un écran, à sa dernière image), "f0", "f1" (une fiche), sinon le nom d'une photo
+  const vignette = (ctx, q, x, y, l) => { const h = (l * 960) / 540; ctx.save(); ctx.translate(x, y); rrect(ctx, 0, 0, l, h, l * 0.05); ctx.clip();
+    if (q[0] === "e" || q[0] === "f") { ctx.scale(l / 540, l / 540); if (q[0] === "e") ECRANS[+q[1]](ctx, 47 / 12); else fiche(ctx, +q[1]); } else photo(ctx, q, 0, 0, l, h, { part: 0.96 });
+    ctx.restore(); };
   // le mur : 5 × 4 vignettes ; le couloir : 7 × 2
+  const MUR_ORDRE = ["208-avant", "e0", "500x-avant", "f0", "208-tableau", "e2", "500x-profil", "208-arriere", "e4", "500x-banquette",
+    "208-profil", "f1", "e1", "500x-arriere", "e5", "500x-tableau", "e3", "208-banquette", "f0", "500x-avant"];
+  const BANDE_ORDRE = ["208-avant", "e1", "500x-avant", "208-tableau", "e3", "500x-profil", "f0", "e0", "208-profil", "500x-arriere", "f1", "208-arriere", "e5", "500x-tableau"];
   definirTexture("mur", { l: 1300, h: 1856, dessiner(ctx) { ctx.fillStyle = "#070709"; ctx.fillRect(0, 0, 1300, 1856); for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) vignette(ctx, MUR_ORDRE[r * 5 + c], c * 260 + 4, r * 464 + 4, 252); } });
-  const MUR_ORDRE = [6, 0, 7, 2, 8, 9, 4, 10, 1, 11, 3, 6, 5, 7, 9, 2, 10, 0, 11, 8];   // 0 à 5 : les étapes ; 6 à 11 : les voitures vendues
-  definirTexture("bande", { l: 2048, h: 1030, dessiner(ctx) { ctx.fillStyle = "#070709"; ctx.fillRect(0, 0, 2048, 1030); for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) vignette(ctx, (c * 5 + r * 3 + 1) % 12, c * 292 + 4, r * 513 + 4, 284); } });
+  definirTexture("bande", { l: 2048, h: 1030, dessiner(ctx) { ctx.fillStyle = "#070709"; ctx.fillRect(0, 0, 2048, 1030); for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) vignette(ctx, BANDE_ORDRE[r * 7 + c], c * 292 + 4, r * 513 + 4, 284); } });
   // l'étiquette d'une étape : son numéro, son nom
   ETAPES.forEach((nom, i) => definirTexture("etiq" + i, { l: 1000, h: 180, dessiner(ctx) {
     verre(ctx, 1000, 180, 40); texte(ctx, "0" + (i + 1), 44, 120, { taille: 84, mono: true, graisse: 600, couleur: C.accent });
