@@ -145,7 +145,7 @@ const CAM_ECRANS = [cleCam(EC.debut, orbite(bas([0, 1.55, -0.55], 7.4, 40, 0.62)
   cleCam(EC.large, orbite(bas([0, 1.5, -0.55], 8.0, 40, 0.64), 8.0, 16, 18, 2), 40), cleCam(EC.large + 0.5, orbite(bas([0, 1.5, -0.55], 7.7, 40, 0.64), 7.7, 20, 19, 2), 40)];
 scene_(4, 8, (t, S) => { ecrans(S, t); camera(S, CAM_ECRANS, t, 0.78); });
 // 5 · le mur : balayé de près, puis la caméra recule jusqu'à le voir de face ; la plaque tombe
-const CAM_MUR = [cleCam(MU.debut, orbite([-0.5, 1.3, -1.2], 2.1, -46, 4, -6)), cleCam(MU.debut + 0.6, orbite([0.5, 2.6, -1.2], 2.4, 28, 8, 4)),
+const CAM_MUR = [cleCam(MU.debut, orbite([-0.4, 1.4, -1.2], 2.7, -36, 4, -4)), cleCam(MU.debut + 0.65, orbite([0.4, 2.5, -1.2], 3.0, 22, 7, 3)),   // le balayage, plus large et plus doux
   cleCam(MU.face + 0.1, orbite([0.1, 2.0, -0.8], 5.0, 8, 5, 1), 38, 0.003), cleCam(MU.face + 0.5, orbite([0, 1.85, -0.6], 7.3, 0, 4, 0), 38, 0), cleCam(CH.plaques[0], orbite([0, 1.85, -0.6], 7.0, 0, 4, 0), 38, 0)];
 scene_(8, 10, (t, S) => { mur(S, t); camera(S, CAM_MUR, t, 0.3); });
 // 6 · les chiffres : la caméra descend la colonne, une plaque par temps, puis recule
