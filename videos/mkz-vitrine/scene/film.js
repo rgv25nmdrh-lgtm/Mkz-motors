@@ -3,8 +3,10 @@
 // Le fil : on tape sa plaque, on appuie sur « Estimer » ; l'estimation monte et se bloque ; les six étapes du
 // dépôt-vente sortent du sol, une par temps ; le mur des voitures vendues, « Et vous ? Rien à faire. » ; les chiffres
 // (0 appel, 0 visite, 1 virement) ; la boucle (Déposez, On vend, Vous encaissez) ; le logo MKZ Motors.
-// Tout est fonction du temps ; les instants viennent du conducteur K (cues.js). Les plans sont composés pour le
-// vertical : de 0 à 8 s, le sujet reste sous les titres (zone du haut, de 300 à 600 px).
+// Tout est fonction du temps ; les instants viennent du conducteur K (cues.js). Le montage est fluide : chaque scène
+// est UN mouvement de caméra continu (une trajectoire lissée par des clés, sans coupe), et les scènes s'enchaînent
+// par des fondus (FONDU, 0,25 s) où la caméra continue d'avancer. Les plans sont composés pour le vertical : de 0 à
+// 8 s, le sujet reste sous les titres (zone du haut, de 300 à 600 px).
 
 const TEMPS = K.T, b = K.b, AV = K.AV;
 const BA = K.barre, CL = K.couloir, EC = K.ecrans, MU = K.mur, CH = K.chiffres, BO = K.boucle, LO = K.logo;
@@ -39,7 +41,7 @@ function barre(S, t) {
 
 // ================================================================ 2 · LE COULOIR (mesure 2) : l'estimation monte, se bloque
 const H_PAN = 2.8, L_PAN = (H_PAN * 2048) / 1030, X_PAN = 1.05, Z_BANDEAU = -13.2, D_BANDEAU = [0.9, 0.5786, 0.03];
-const zCam = (t) => lerp(2.6, -9.3, E.outCubic(prog(t, CL.debut, CL.bloque - CL.debut)));
+const zCam = (t) => lerp(3.0, -9.3, E.outCubic(prog(t, CL.debut - 0.13, CL.bloque - CL.debut + 0.13)));
 const estimation = (t) => (t >= CL.bloque ? VITRINE.PRIX : VITRINE.PRIX * E.outQuad(prog(t, CL.debut + 0.1, CL.bloque - CL.debut - 0.1)));
 function couloir(S, t) {
   const bl = t >= CL.bloque;
@@ -52,7 +54,8 @@ function couloir(S, t) {
 // ================================================================ 3, 4 · LES ÉCRANS (mesures 3 et 4) : les six étapes, une par temps
 // Deux gradins de trois écrans verticaux : 01 à 03 devant, 04 à 06 derrière et plus haut. L'étiquette sous chaque écran.
 const D_E = [0.34, 0.6044, 0.025], D_ETIQ = [0.36, 0.0648, 0.012];
-const ECR = [0, 1, 2, 3, 4, 5].map((i) => { const col = i % 3, rang = Math.floor(i / 3), y0 = rang ? 2.06 : 0.42; return { i, y0, c: [(col - 1) * 0.86, y0 + D_E[1], rang ? -1.1 : 0], lacet: -(col - 1) * 12 }; });
+// en serpentin, pour que la caméra les suive d'un seul mouvement : 01 02 03 devant, de gauche à droite ; 04 05 06 derrière, de droite à gauche
+const ECR = [0, 1, 2, 3, 4, 5].map((i) => { const rang = i >= 3 ? 1 : 0, col = rang ? 5 - i : i, y0 = rang ? 2.06 : 0.42; return { i, rang, y0, c: [(col - 1) * 0.86, y0 + D_E[1], rang ? -1.1 : 0], lacet: -(col - 1) * 12 }; });
 const imageDe = (t) => clamp(Math.floor((t - EC.debut) * 12), 0, VITRINE.N - 1);
 function ecrans(S, t) {
   ECR.forEach((e) => {
@@ -108,50 +111,70 @@ function logo(S, t) {
   S.lumieres.push({ p: [P_LOGO[0], 1.95, 0.9], couleur: ORANGE, intensite: 0.5 + 1.4 * choc(t, LO.debut, 0.3), rayon: 3.5 }); lumiereCle(S, [0, 0, 0]);
 }
 
-// ================================================================ LES PLANS : [instant de la coupe, ce qu'on voit]
-const PLANS = [];
-const plan = (a, f) => PLANS.push({ a, f });
-const vise = (S, k, o = {}) => { S.cam = k; if (o.fov) S.fov = o.fov; if (o.ouverture !== undefined) S.ouverture = o.ouverture; if (o.mise) S.mise = o.mise; if (o.clair) S.clair = true; };
-const entre = (t, a, z, ka, kb, e = E.outCubic) => cle([[a, ka], [z, kb, e]], t);
+// ================================================================ LE MONTAGE : des scènes, chacune un seul mouvement de caméra
+// Une clé de caméra : { t, k (orbite…), fov, ouv (ouverture), elan (vitesse à la clé : 1 normale, 0 à l'arrêt) }.
+// Entre les clés, une courbe d'Hermite : la position, la visée, le roulis, le champ et le flou changent sans à-coup
+// (vitesse continue). ralentir (0 à 1) : la caméra ralentit au passage de chaque clé, sans jamais s'arrêter.
+const cleCam = (t, k, fov = 38, ouv = 0.006, elan = 1) => ({ t, k, fov, ouv, elan });
+function trajet(cles, t, ralentir = 0) {
+  const n = cles.length, T = cles.map((c) => c.t), V = cles.map((c) => [...c.k, c.fov, c.ouv]);
+  const vit = V.map((v, i) => { const a = Math.max(0, i - 1), b = Math.min(n - 1, i + 1); return v.map((x, j) => (cles[i].elan * (V[b][j] - V[a][j])) / (T[b] - T[a])); });
+  if (t <= T[0]) return V[0].map((x, j) => x + (1 - ralentir) * vit[0][j] * (t - T[0]));                 // avant la première clé : sur sa lancée
+  if (t >= T[n - 1]) return V[n - 1].map((x, j) => x + (1 - ralentir) * vit[n - 1][j] * (t - T[n - 1]));   // après la dernière : de même
+  let i = 0; while (t > T[i + 1]) i++;
+  const h = T[i + 1] - T[i]; let u = (t - T[i]) / h;
+  if (ralentir) u -= (ralentir * Math.sin(2 * Math.PI * u)) / (2 * Math.PI);
+  const u2 = u * u, u3 = u2 * u, h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = 3 * u2 - 2 * u3, h11 = u3 - u2;
+  return V[i].map((x, j) => h00 * x + h10 * h * vit[i][j] + h01 * V[i + 1][j] + h11 * h * vit[i + 1][j]);
+}
+const camera = (S, cles, t, ralentir = 0, o = {}) => { const r = trajet(cles, t, ralentir); S.cam = r.slice(0, 7); S.fov = r[7]; S.ouverture = Math.max(0, r[8]); if (o.clair) S.clair = true; };
+const SECTIONS = [];
+const scene_ = (de, a, f) => SECTIONS.push({ de, a, f });
+const FONDU = 0.25;   // durée des fondus entre les scènes, centrés sur la frontière
 
-// 1 · la barre : la caméra longe la plaque pendant qu'on la tape ; très gros plan sur le bouton
-plan(0, (t, S) => { barre(S, t); vise(S, entre(t, 0, coupe(BA.appui), orbite(bas([-0.5, 1.12, 0], 3.9, 46, 0.6), 3.9, -12, 5, -3), orbite(bas([-0.22, 1.1, 0], 3.6, 46, 0.6), 3.6, -3, 3, 0), lin), { fov: 46, ouverture: 0.004 }); });
-plan(coupe(BA.appui), (t, S) => { barre(S, t); const d = lerp(1.25, 1.1, prog(t, BA.appui, 0.5)); vise(S, orbite(bas([X_BOUTON - 0.05, 1.05, 0.05], d, 40), d, 26, 7, 4), { fov: 40, ouverture: 0.008 }); });
-// 2 · le couloir
-plan(coupe(CL.debut), (t, S) => { couloir(S, t); const z = zCam(t) - 0.35 * prog(t, CL.bloque, 0.5), y = 1.2 + 0.14 * hauteurVue(z - Z_BANDEAU, 52);
-  vise(S, [0.1 * Math.sin(t * 5), y, z, 0, y, z - 5, 2.5 * Math.sin(t * 4.1) * (1 - prog(t, CL.bloque - 0.3, 0.3))], { fov: 52, ouverture: 0.003 }); });
-// 3, 4 · les écrans : ils sortent du sol ; un gros plan par temps, dans l'ordre ; tous, de haut
-plan(coupe(EC.debut), (t, S) => { ecrans(S, t); vise(S, entre(t, coupe(EC.debut), EC.plans[0], orbite(bas([0, 1.55, -0.55], 7.6, 40, 0.62), 7.6, -14, 5, -2), orbite(bas([0, 1.55, -0.55], 7.0, 40, 0.62), 7.0, -6, 4, 0)), { fov: 40 }); });
-ECR.forEach((e, j) => { const s = j % 2 ? 1 : -1, tp = EC.plans[j];
-  plan(coupe(tp), (t, S) => { ecrans(S, t); const d = lerp(3.4, 3.15, prog(t, tp, 0.5)); vise(S, orbite(bas([e.c[0], e.y0 + 0.5, e.c[2]], d, 38, 0.66), d, e.lacet + s * 18, 4, -s * 2), { ouverture: j < 3 ? 0.012 : 0.004 }); }); });   // devant : le gradin du fond, flou, ne gêne pas le titre
-plan(coupe(EC.large), (t, S) => { ecrans(S, t); const d = lerp(8.2, 7.8, prog(t, EC.large, 0.5)); vise(S, orbite(bas([0, 1.5, -0.55], d, 40, 0.64), d, 16, 18, 2), { fov: 40 }); });
-// 5 · le mur : balayé de très près, puis de face ; la plaque tombe
-plan(coupe(MU.debut), (t, S) => { mur(S, t); vise(S, entre(t, coupe(MU.debut), MU.face, orbite([-0.5, 1.3, -1.2], 2.1, -46, 4, -6), orbite([0.5, 2.6, -1.2], 2.6, 30, 8, 5), lin), { ouverture: 0.006 }); });
-plan(coupe(MU.face), (t, S) => { mur(S, t); vise(S, entre(t, coupe(MU.face), CH.plaques[0], orbite([0, 1.85, -0.6], 7.4, 0, 4, 0), orbite([0, 1.85, -0.6], 7.0, 0, 4, 0))); });
-// 6 · les chiffres : un plan par plaque, puis la colonne entière
-[[3.0, -18, 5, -3], [2.9, 16, 2, 3], [2.8, -10, 7, -2]].forEach(([d, la, ha, ro], i) => plan(coupe(CH.plaques[i]), (t, S) => { chiffres(S, t); vise(S, orbite([0, PY[i] - 0.05, 0], lerp(d, d - 0.15, prog(t, CH.plaques[i], 0.5)), la, ha, ro), { fov: 42 }); }));
-plan(coupe(CH.ligne), (t, S) => { chiffres(S, t); vise(S, orbite([0, 1.95, 0], lerp(6.2, 5.9, prog(t, CH.ligne, 0.5)), 0, 4, 0)); });
-// 7 · la boucle, dans la scène claire
-plan(coupe(BO.etapes[0]), (t, S) => { boucle(S, t); vise(S, entre(t, coupe(BO.etapes[0]), BO.etapes[2], orbite([-0.05, 1.6, 0], 5.0, -12, 3, 0), orbite([-0.05, 1.6, 0], 4.6, -4, 3, 0), lin), { fov: 42, clair: 1 }); });
-plan(coupe(BO.etapes[2]), (t, S) => { boucle(S, t); vise(S, orbite([X_ET - 0.12, Y_ET[2] + 0.3, 0], lerp(3.6, 3.35, prog(t, BO.etapes[2], 0.5)), 14, 3, 2), { fov: 42, clair: 1 }); });
-plan(coupe(BO.retour), (t, S) => { boucle(S, t); vise(S, orbite([-0.1, 1.7, 0], lerp(5.2, 4.9, prog(t, BO.retour, 0.5)), 6, 4, 0), { fov: 42, clair: 1 }); });
+// 1 · la barre : la caméra longe la plaque pendant qu'on la tape, puis plonge sur le bouton et s'y enfonce
+const CAM_BARRE = [cleCam(0, orbite(bas([-0.5, 1.12, 0], 3.9, 46, 0.6), 3.9, -12, 5, -3), 46, 0.004), cleCam(1.3, orbite(bas([-0.22, 1.1, 0], 3.6, 46, 0.6), 3.6, -3, 3, 0), 46, 0.004, 0.3),
+  cleCam(1.58, orbite(bas([X_BOUTON - 0.05, 1.05, 0.05], 1.2, 40), 1.2, 26, 7, 4), 40, 0.008), cleCam(2.0, orbite(bas([X_BOUTON, 1.05, 0.05], 0.75, 40), 0.75, 30, 7, 5), 40, 0.008)];
+scene_(0, 2, (t, S) => { barre(S, t); camera(S, CAM_BARRE, t); });
+// 2 · le couloir : on file entre les photos ; l'estimation se bloque, la caméra s'en approche
+scene_(2, 4, (t, S) => { couloir(S, t); const z = zCam(t) - 0.35 * prog(t, CL.bloque, 0.6) - 0.5 * Math.max(0, t - 3.95) ** 1.5, y = 1.2 + 0.14 * hauteurVue(z - Z_BANDEAU, 52);
+  S.cam = [0.05 * Math.sin(t * 5), y, z, 0, y, z - 5, 1.2 * Math.sin(t * 4.1) * (1 - prog(t, CL.bloque - 0.3, 0.3))]; S.fov = 52; S.ouverture = 0.003; });
+// 3, 4 · les écrans : de loin, puis d'écran en écran (01 → 06, en serpentin), puis tous, de haut
+const CAM_ECRANS = [cleCam(EC.debut, orbite(bas([0, 1.55, -0.55], 7.4, 40, 0.62), 7.4, -14, 5, -2), 40),
+  ...ECR.map((e, j) => cleCam(EC.plans[j], orbite(bas([e.c[0], e.y0 + 0.5, e.c[2]], 3.3, 38, 0.66), 3.3, e.lacet + [-16, -4, 10, 14, 2, -12][j], 4, [1, 0, -1, -1, 0, 1][j]), 38, e.rang ? 0.004 : 0.01)),
+  cleCam(EC.large, orbite(bas([0, 1.5, -0.55], 8.0, 40, 0.64), 8.0, 16, 18, 2), 40), cleCam(EC.large + 0.5, orbite(bas([0, 1.5, -0.55], 7.7, 40, 0.64), 7.7, 20, 19, 2), 40)];
+scene_(4, 8, (t, S) => { ecrans(S, t); camera(S, CAM_ECRANS, t, 0.78); });
+// 5 · le mur : balayé de près, puis la caméra recule jusqu'à le voir de face ; la plaque tombe
+const CAM_MUR = [cleCam(MU.debut, orbite([-0.5, 1.3, -1.2], 2.1, -46, 4, -6)), cleCam(MU.debut + 0.6, orbite([0.5, 2.6, -1.2], 2.4, 28, 8, 4)),
+  cleCam(MU.face + 0.1, orbite([0.1, 2.0, -0.8], 5.0, 8, 5, 1), 38, 0.003), cleCam(MU.face + 0.5, orbite([0, 1.85, -0.6], 7.3, 0, 4, 0), 38, 0), cleCam(CH.plaques[0], orbite([0, 1.85, -0.6], 7.0, 0, 4, 0), 38, 0)];
+scene_(8, 10, (t, S) => { mur(S, t); camera(S, CAM_MUR, t, 0.3); });
+// 6 · les chiffres : la caméra descend la colonne, une plaque par temps, puis recule
+const CAM_CHIFFRES = [cleCam(CH.plaques[0], orbite([0, PY[0] - 0.05, 0], 3.0, -16, 5, -2), 42), cleCam(CH.plaques[1], orbite([0, PY[1] - 0.05, 0], 2.9, 12, 2, 2), 42),
+  cleCam(CH.plaques[2], orbite([0, PY[2] - 0.05, 0], 2.8, -8, 6, -1), 42), cleCam(CH.ligne, orbite([0, 1.95, 0], 6.2, 0, 4, 0), 38), cleCam(CH.ligne + 0.5, orbite([0, 1.95, 0], 5.9, 0, 4, 0), 38)];
+scene_(10, 12, (t, S) => { chiffres(S, t); camera(S, CAM_CHIFFRES, t, 0.72); });
+// 7 · la boucle, dans la scène claire ; la caméra finit là où commence celle du logo (la pastille ne saute pas)
+const K_LOGO = (t) => orbite([0, 1.18, 0], lerp(5.0, 4.7, prog(t, LO.debut, 2)), 0, 2, 0);
+const CAM_BOUCLE = [cleCam(BO.etapes[0], orbite([-0.05, 1.6, 0], 5.0, -12, 3, 0), 42), cleCam(BO.etapes[1], orbite([-0.05, 1.6, 0], 4.6, -6, 3, 0), 42),
+  cleCam(BO.etapes[2], orbite([X_ET - 0.12, Y_ET[2] + 0.3, 0], 3.5, 14, 3, 2), 42), cleCam(BO.retour, orbite([-0.1, 1.6, 0], 4.9, 6, 3, 0), 40), cleCam(LO.debut, K_LOGO(LO.debut), 38, 0, 0)];
+scene_(12, 14, (t, S) => { boucle(S, t); camera(S, CAM_BOUCLE, t, 0.4, { clair: 1 }); });
 // 8 · le logo, tenu
-plan(coupe(LO.debut), (t, S) => { logo(S, t); vise(S, orbite([0, 1.18, 0], lerp(5.0, 4.7, prog(t, LO.debut, 2)), 0, 2, 0), { ouverture: 0 }); S.calme = t > LO.debut + 0.5; });
+scene_(14, 16, (t, S) => { logo(S, t); S.cam = K_LOGO(t); S.fov = 38; S.ouverture = 0; });
 
 // ================================================================ la scène
-const planDe = (t) => { let i = 0; for (let k = 0; k < PLANS.length; k++) if (t >= PLANS[k].a - 1e-6) i = k; return i; };
-let T_IMAGE = 0;
+const sectionDe = (t) => { let i = 0; for (let k = 0; k < SECTIONS.length; k++) if (t >= SECTIONS[k].de - 1e-6) i = k; return i; };
+let T_IMAGE = 0, SECTION_FORCEE = null;
 function scene(tt) {
-  const pl = planDe(T_IMAGE), t = clamp(tt, PLANS[pl].a, (PLANS[pl + 1]?.a ?? K.DUREE) - 1e-4);
+  const i = SECTION_FORCEE ?? sectionDe(T_IMAGE), sec = SECTIONS[i], t = clamp(tt, sec.de - FONDU, sec.a + FONDU);
   const S = { boites: [], spheres: [], lumieres: [], sol: { reflet: 0.62, rugosite: 0.1, pulsation: 0 }, cam: null, fov: 38, ouverture: 0.006, mise: undefined };
-  PLANS[pl].f(t, S);
-  let pos = S.cam.slice(0, 3), cible = S.cam.slice(3, 6), roulis = S.cam[6] || 0;
-  // sur chaque coup de grosse caisse : une poussée, une secousse (adoucies pour la Story), un éclair rouge très court
-  let z = 0, s = 0, pu = 0;
-  for (const [tk, f] of K.frappes) { const d = t - tk; if (d < 0 || d > 0.5) continue; z += 0.035 * f * Math.exp(-d / 0.11); s += f * Math.sin(d * 55) * Math.exp(-d / 0.08); pu += 0.5 * f * choc(t, tk, 0.16); }
+  sec.f(t, S);
+  let pos = S.cam.slice(0, 3);
+  const cible = S.cam.slice(3, 6), roulis = S.cam[6] || 0;
+  // sur chaque coup de grosse caisse : une légère poussée (sans secousse, pour la fluidité) et un éclair rouge très court
+  let z = 0, pu = 0;
+  for (const [tk, f] of K.frappes) { const d = t - tk; if (d < 0 || d > 0.6) continue; z += 0.02 * f * Math.exp(-d / 0.14) * prog(t, tk, 0.04); pu += 0.5 * f * choc(t, tk, 0.16); }
   const dist = v3.lon(v3.sub(cible, pos));
   if (pu > 0.03 && !S.clair) S.lumieres.unshift({ p: v3.add(pos, [0, 0.4, 0]), couleur: ORANGE, intensite: 1.3 * pu, rayon: dist * 2.2 });
-  pos = v3.mix(pos, cible, z); roulis += 0.28 * s; pos = v3.add(pos, [0, 0.003 * s * dist, 0]); S.sol.pulsation = Math.max(S.sol.pulsation, pu);
+  pos = v3.mix(pos, cible, z); S.sol.pulsation = Math.max(S.sol.pulsation, pu);
   return { cam: { pos, cible, roulis, fov: S.fov, ouverture: S.ouverture, ...(S.mise ? { mise: S.mise } : {}) }, boites: S.boites, spheres: S.spheres, lumieres: S.lumieres.slice(0, 4), sol: S.sol, ambiance: S.clair ? CLAIR : AMB };
 }
 
@@ -201,8 +224,23 @@ function titres(x, t) {
 }
 
 const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120, RAYONS = window.RAYONS || 2;   // obturateur : 1/120 s, soit 180° à 60 i/s ; RAYONS : rayons par passe et par pixel (1 à 4)
-let CALQUE = null;
-window.__seek = (t) => { t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT, rayons: RAYONS }); M.attendre(); titres(CALQUE, t); };
+let CALQUE = null, FONDU_CTX = null, TOILE_3D = null;
+const TRANSITIONS = SECTIONS.slice(1).map((s, i) => ({ tc: s.de, a: i, b: i + 1 }));
+// Un fondu : la scène qui part est calculée, posée sur un calque 2D, puis la scène qui arrive est calculée dessous ; le
+// calque devient transparent (en douceur) sur la durée du fondu. Ces images-là coûtent deux rendus.
+window.__seek = (t) => {
+  t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t);
+  const o = { echantillons: ECH, obturateur: OBT, rayons: RAYONS }, tr = TRANSITIONS.find((q) => Math.abs(t - q.tc) < FONDU / 2);
+  FONDU_CTX.clearRect(0, 0, W, H);
+  if (tr) {
+    const p = 0.5 - 0.5 * Math.cos(Math.PI * clamp((t - (tr.tc - FONDU / 2)) / FONDU));
+    SECTION_FORCEE = tr.a; M.image(t, scene, o); M.attendre();
+    FONDU_CTX.globalAlpha = 1 - p; FONDU_CTX.drawImage(TOILE_3D, 0, 0, W, H); FONDU_CTX.globalAlpha = 1;
+    SECTION_FORCEE = tr.b; M.image(t, scene, o); M.attendre();
+  } else { SECTION_FORCEE = null; M.image(t, scene, o); M.attendre(); }
+  SECTION_FORCEE = null;
+  titres(CALQUE, t);
+};
 window.__ready = false;
 // La mise en route (moteur, textures) est lourde sans carte graphique : elle attend la fin du chargement de la page,
 // sinon elle le retarde, et l'outil de rendu, qui attend ce chargement 60 s au plus, abandonne.
@@ -211,6 +249,7 @@ Promise.all([POLICES_PRETES, VITRINE.charger(), PAGE_CHARGEE]).then(() => {   //
   const plateau = document.getElementById("plateau");
   const DEF = window.DEFINITION || 1;   // définition du rendu 3D (0,75 : les trois quarts des pixels de côté, l'image est agrandie)
   const cv = document.createElement("canvas"); cv.width = Math.round(W * DEF); cv.height = Math.round(H * DEF); cv.style.width = W + "px"; cv.style.height = H + "px"; plateau.appendChild(cv);
+  const cf = document.createElement("canvas"); cf.width = W; cf.height = H; plateau.appendChild(cf); FONDU_CTX = cf.getContext("2d"); TOILE_3D = cv;   // le calque des fondus
   const cq = document.createElement("canvas"); cq.width = W; cq.height = H; plateau.appendChild(cq); CALQUE = cq.getContext("2d");   // le calque des titres
   M = Moteur.creer(cv, { largeur: cv.width, hauteur: cv.height, couches: 4, texL: TL, texH: TH });
   texturesFixes(); textures(0);   // pas d'image d'échauffement : la première image demandée la calcule
