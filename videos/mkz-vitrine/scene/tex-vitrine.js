@@ -1,8 +1,9 @@
 // MKZ Motors, la vitrine du dépôt-vente : tout ce qui est dessiné sur canevas, et les vraies photos des véhicules.
 // Les six écrans montrent les six étapes du dépôt-vente, animées image par image (48 images à 12 par seconde,
 // de 4 à 8 s) : l'estimation, les photos, l'annonce, l'essai, le paiement, les démarches.
-// Les photos (scene/img/) sont celles des véhicules en vente sur la boutique mkzmotors.com : la Peugeot 208 Diesel
-// 2020 (9 600 €), le héros de la vidéo, et la Fiat 500X Lounge Diesel 2015 (7 600 €, 144 000 km).
+// Les photos (scene/img/) sont celles des véhicules de MKZ Motors : la Peugeot 208 Diesel 2020 (9 600 €), le héros de
+// la vidéo, et la Fiat 500X Lounge Diesel 2015 (7 600 €, 144 000 km), en vente sur la boutique mkzmotors.com ; la
+// Renault Clio 4 noire (photos envoyées par MKZ ; pas encore sur la boutique : son prix n'est pas affiché).
 // Chaque dessin est une fonction pure de ses paramètres. Restent des exemples : la plaque tapée (AB-123-CD), la
 // demande d'essai du jeudi 18:30, le trajet de l'essai.
 (() => {
@@ -30,11 +31,13 @@
   const VEHICULES = [
     { nom: "Peugeot 208", annee: 2020, details: "Diesel · Manuelle · Gris", prix: 9600, photo: "208-avant" },
     { nom: "Fiat 500X Lounge", annee: 2015, details: "Diesel · 144 000 km", prix: 7600, photo: "500x-avant" },
+    { nom: "Renault Clio 4", annee: null, details: "Noire · Boîte manuelle", prix: null, photo: "clio-avant" },   // prix et année : à compléter
   ];
   // les photos (900 × 1600) : centre de la voiture (x, y de 0 à 1) et part de la largeur qu'elle occupe (1 : intérieur)
   const PHOTOS = {
     "208-avant": [0.52, 0.52, 0.84], "208-arriere": [0.5, 0.5, 0.84], "208-profil": [0.5, 0.52, 0.94], "208-tableau": [0.5, 0.5, 1], "208-banquette": [0.5, 0.5, 1],
     "500x-avant": [0.5, 0.665, 0.98], "500x-arriere": [0.5, 0.66, 0.98], "500x-profil": [0.5, 0.515, 0.86], "500x-tableau": [0.5, 0.5, 1], "500x-banquette": [0.5, 0.5, 1],
+    "clio-avant": [0.5, 0.495, 0.84], "clio-arriere": [0.5, 0.5, 0.85], "clio-tableau": [0.5, 0.5, 1],
   };
   const IMG = {};
   globalThis.VITRINE = { PRIX, ETAPES, N: 48,
@@ -190,8 +193,8 @@
     const v = VEHICULES[i % VEHICULES.length];
     entete(ctx, 0); photo(ctx, v.photo, 24, 128, 492, 420, { r: 22, part: 0.88 });
     bloc(ctx, 42, 146, 210, 46, 23, C.accent); texte(ctx, "EN VITRINE", 147, 179, { taille: 24, mono: true, graisse: 600, couleur: "#ffffff", align: "center" });
-    texte(ctx, `${v.nom} · ${v.annee}`, 30, 630, { taille: 44, graisse: 600, serre: -0.03 }); texte(ctx, v.details, 30, 676, { taille: 27, couleur: C.doux });
-    prix(ctx, v.prix, 30, 770, { taille: 72, graisse: 600, couleur: C.accent });
+    texte(ctx, v.annee ? `${v.nom} · ${v.annee}` : v.nom, 30, 630, { taille: 44, graisse: 600, serre: -0.03 }); texte(ctx, v.details, 30, 676, { taille: 27, couleur: C.doux });
+    if (v.prix) prix(ctx, v.prix, 30, 770, { taille: 72, graisse: 600, couleur: C.accent }); else texte(ctx, "Prix sur demande", 30, 762, { taille: 50, graisse: 600, serre: -0.03, couleur: C.accent });
     texte(ctx, "Disponible chez MKZ Motors", 30, 880, { taille: 28, couleur: C.doux });
   }
   // les écrans sont dessinés en 720 × 1280 (4/3 de leur repère de 540 × 960) : leurs textes restent nets en gros plan
@@ -201,9 +204,9 @@
     if (q[0] === "e" || q[0] === "f") { ctx.scale(l / 540, l / 540); if (q[0] === "e") ECRANS[+q[1]](ctx, 47 / 12); else fiche(ctx, +q[1]); } else photo(ctx, q, 0, 0, l, h, { part: 0.96 });
     ctx.restore(); };
   // le mur : 5 × 4 vignettes ; le couloir : 7 × 2
-  const MUR_ORDRE = ["208-avant", "e0", "500x-avant", "f0", "208-tableau", "e2", "500x-profil", "208-arriere", "e4", "500x-banquette",
-    "208-profil", "f1", "e1", "500x-arriere", "e5", "500x-tableau", "e3", "208-banquette", "f0", "500x-avant"];
-  const BANDE_ORDRE = ["208-avant", "e1", "500x-avant", "208-tableau", "e3", "500x-profil", "f0", "e0", "208-profil", "500x-arriere", "f1", "208-arriere", "e5", "500x-tableau"];
+  const MUR_ORDRE = ["208-avant", "e0", "clio-avant", "f1", "500x-tableau", "e2", "500x-avant", "f2", "208-arriere", "e4",
+    "clio-arriere", "208-profil", "e1", "f0", "500x-arriere", "208-tableau", "e3", "500x-profil", "clio-tableau", "e5"];
+  const BANDE_ORDRE = ["208-avant", "e1", "clio-avant", "500x-avant", "e3", "f2", "208-tableau", "e0", "clio-arriere", "208-profil", "f1", "500x-arriere", "e5", "clio-tableau"];
   definirTexture("mur", { l: 1300, h: 1856, dessiner(ctx) { ctx.fillStyle = "#070709"; ctx.fillRect(0, 0, 1300, 1856); for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) vignette(ctx, MUR_ORDRE[r * 5 + c], c * 260 + 4, r * 464 + 4, 252); } });
   definirTexture("bande", { l: 2048, h: 1030, dessiner(ctx) { ctx.fillStyle = "#070709"; ctx.fillRect(0, 0, 2048, 1030); for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) vignette(ctx, BANDE_ORDRE[r * 7 + c], c * 292 + 4, r * 513 + 4, 284); } });
   // l'étiquette d'une étape : son numéro, son nom

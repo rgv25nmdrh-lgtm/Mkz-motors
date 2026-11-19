@@ -9,17 +9,19 @@ L'idée : **votre voiture mérite une vitrine.** On tape sa plaque, MKZ l'estime
 du sol, une par temps, chacune sur son écran ; puis le mur des vraies voitures de MKZ, et la promesse : vous, vous
 n'avez rien à faire.
 
-**Les vraies voitures de MKZ Motors.** Les photos (`scene/img/`, 900 × 1600) sont celles des véhicules en vente sur la
-boutique mkzmotors.com : la **Peugeot 208 Diesel 2020** (grise, boîte manuelle, garantie 3 mois, 9 600 €), le héros de
-la vidéo, et la **Fiat 500X Lounge Diesel 2015** (144 000 km, 7 600 €). Cinq photos chacune : l'avant, l'arrière, le
-profil, le tableau de bord, la banquette.
+**Les vraies voitures de MKZ Motors.** Les photos (`scene/img/`, 900 × 1600) sont celles des véhicules de MKZ : la
+**Peugeot 208 Diesel 2020** (grise, boîte manuelle, garantie 3 mois, 9 600 €), le héros de la vidéo, et la **Fiat 500X
+Lounge Diesel 2015** (144 000 km, 7 600 €), en vente sur la boutique mkzmotors.com (cinq photos chacune : l'avant,
+l'arrière, le profil, le tableau de bord, la banquette) ; la **Renault Clio 4** noire, boîte manuelle (trois photos
+envoyées par MKZ : l'avant, l'arrière, le tableau de bord). La Clio n'est pas encore sur la boutique : sa fiche dit
+« Prix sur demande » ; pour afficher son prix et son année, les remplir dans `VEHICULES`.
 
 | Mesure | Secondes | Ce qui se passe | Titre de la Story |
 |---|---|---|---|
 | 1 | 0 à 2 | « Estimer ma voiture » : on tape sa plaque, AB-123-CD, lettre par lettre ; la voiture est reconnue (Peugeot 208 · 2020 · Diesel) ; très gros plan, le bouton s'enfonce | Votre voiture **mérite une vitrine.** |
 | 2 | 2 à 4 | On file dans un couloir tapissé des photos des voitures ; « Votre estimation » monte et se bloque sur 9 600 € | (le même) |
 | 3 et 4 | 4 à 8 | Six écrans sortent du sol, sur deux gradins ; un gros plan par temps : 01 Estimation (la 208 de profil, la jauge), 02 Photos pro (les vraies photos de la 208 dans le viseur, une par éclair, et leurs vignettes), 03 Annonce en ligne (la fiche de la 208 : 9 600 €, garantie 3 mois ; une demande d'essai arrive), 04 Essais (le trajet sur la carte), 05 Paiement sécurisé (le bouclier, « Virement reçu + 9 600 € »), 06 Démarches (quatre papiers cochés, « Dossier complet ») ; puis tous, de haut | Six étapes, **aucune pour vous.** |
-| 5 | 8 à 10 | Le mur des vraies voitures de MKZ (les photos de la 208 et de la 500X, leurs fiches « En vitrine », les écrans des étapes), balayé de près, puis de face ; une plaque tombe : « Et vous ? **Rien** à faire. » | — |
+| 5 | 8 à 10 | Le mur des vraies voitures de MKZ (les photos de la 208, de la 500X et de la Clio 4, leurs fiches « En vitrine », les écrans des étapes), balayé de près, puis de face ; une plaque tombe : « Et vous ? **Rien** à faire. » | — |
 | 6 | 10 à 12 | Trois plaques tombent en colonne, une par temps : **0** appel à gérer, **0** visite chez vous, **1** virement, c'est tout | — |
 | 7 | 12 à 14 | La scène claire : Déposez → On vend → Vous encaissez ; la pastille rouge descend d'une étape à l'autre, puis s'envole | — |
 | 8 | 14 à 16 | La pastille devient la plaque du logo MKZ Motors ; « DÉPÔT-VENTE » ; « Votre voiture en vitrine. On s'occupe du reste. » ; mkzmotors.com | — |
