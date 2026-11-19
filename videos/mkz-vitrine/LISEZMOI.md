@@ -37,7 +37,7 @@ que fait vraiment MKZ Motors : « organisé par MKZ » (l'essai), « Vérifié a
 | `scene/base.js`, `scene/outils.js` | La couleur : `C.accent` (le rouge MKZ, `#fa0f14`) et sa valeur 3D `ORANGE` (nom hérité du kit), à changer ensemble. Le logo : `scene/logo-mkz.png`. |
 | `scene/moteur.js` | Le moteur 3D du kit (lanceur de rayons WebGL2), non modifié. |
 | `tools/musique.mjs` | La musique (ré mineur, fin en ré majeur) et les bruitages (une touche par lettre de la plaque, la voiture reconnue, les écrans, les plaques…). |
-| `scene/index.html`, `scene/apercu.html` | Final (60 i/s, 2 passes par image, 3D en 810 × 1440 agrandie, flou de mouvement à 180°) et aperçu (1 passe, 3D en 540 × 960). Avec une carte graphique : `ECHANTILLONS = 24` et `DEFINITION = 1` dans `index.html`. |
+| `scene/index.html`, `scene/apercu.html` | Final : 60 images/s (le maximum des Stories Instagram, TikTok et Facebook), 3D calculée en pleine définition 1080 × 1920, 4 passes par image (anticrénelage, flou de mouvement à 180° en 4 temps, profondeur de champ), écrans dessinés en 720 × 1280, 40 Mbit/s. Aperçu : 30 i/s, 1 passe, 3D en 540 × 960. Avec une carte graphique : `ECHANTILLONS = 24` et `RAYONS = 2` dans `index.html`, la qualité maximale du kit. |
 | `scene/dessins.html` | Une planche de tous les dessins, sans la 3D, pour les relire en pleine définition (`dessins.html?u=1.5` : les écrans à 1,5 s). |
 
 ## Fabriquer la vidéo
@@ -51,8 +51,11 @@ avec Pillow (`node tools/verifier.mjs` dit ce qui manque).
     node tools/rendu.mjs video --scene scene/apercu.html --fps 30 --dpr 1 --workers 3 --delai 120 --bitrate 6000000 --out out/apercu-muet.mp4
     bash outils-rendu/rendu-final.sh                         # le rendu final, par tranches de 4 s (voir le script)
 
-Le rendu final sans carte graphique prend environ deux heures ; avec une carte graphique, quelques minutes. Ne pas
-modifier `scene/` pendant un rendu. La sortie : `livrables/mkz-motors-vitrine-1080x1920.mp4`.
+Le rendu final sans carte graphique prend environ sept heures (25 s par image) ; avec une carte graphique, quelques
+minutes. Il se fait par tranches de 2 s : relancer le script reprend là où il s'était arrêté. Deux fichiers sortent :
+`livrables/mkz-motors-vitrine-1080x1920.mp4` (40 Mbit/s, le fichier maître) et `livrables/mkz-motors-vitrine-leger.mp4`
+(environ 10 Mbit/s, pour la mise en ligne). Ne pas
+modifier `scene/` pendant un rendu.
 
 ## Contrôles
 

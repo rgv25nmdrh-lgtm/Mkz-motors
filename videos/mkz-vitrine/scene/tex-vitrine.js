@@ -221,7 +221,8 @@
     prix(ctx, montant, 30, 642, { taille: 66, graisse: 600, couleur: C.texte });
     ctx.save(); ctx.translate(270, 790); ctx.rotate(-0.14); bloc(ctx, -170, -62, 340, 124, 18, rouge(0.1), C.accent, 8); texte(ctx, "VENDUE", 0, 26, { taille: 76, graisse: 700, mono: true, align: "center", couleur: C.accent }); ctx.restore();
   }
-  ECRANS.forEach((f, i) => definirTexture("ecran" + i, { l: 540, h: 960, dessiner(ctx, p = {}) { f(ctx, (p.k || 0) / 12); } }));
+  // les écrans sont dessinés en 720 × 1280 (4/3 de leur repère de 540 × 960) : leurs textes restent nets en gros plan
+ECRANS.forEach((f, i) => definirTexture("ecran" + i, { l: 720, h: 1280, dessiner(ctx, p = {}) { ctx.scale(4 / 3, 4 / 3); f(ctx, (p.k || 0) / 12); } }));
   // une vignette du mur : l'écran n (0 à 5, à sa dernière image) ou une voiture vendue (6 et plus)
   const vignette = (ctx, n, x, y, l) => { ctx.save(); ctx.translate(x, y); rrect(ctx, 0, 0, l, (l * 960) / 540, l * 0.05); ctx.clip(); ctx.scale(l / 540, l / 540); if (n < 6) ECRANS[n](ctx, 47 / 12); else vendue(ctx, n - 6); ctx.restore(); };
   // le mur : 5 × 4 vignettes ; le couloir : 7 × 2

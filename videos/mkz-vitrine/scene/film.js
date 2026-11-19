@@ -200,9 +200,9 @@ function titres(x, t) {
   x.restore();
 }
 
-const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120;   // obturateur : 1/120 s, soit 180° à 60 i/s
+const ECH = window.ECHANTILLONS || 24, OBT = window.OBTURATEUR || 1 / 120, RAYONS = window.RAYONS || 2;   // obturateur : 1/120 s, soit 180° à 60 i/s ; RAYONS : rayons par passe et par pixel (1 à 4)
 let CALQUE = null;
-window.__seek = (t) => { t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT }); M.attendre(); titres(CALQUE, t); };
+window.__seek = (t) => { t = clamp(t, 0, K.DUREE - 1e-4); T_IMAGE = t; textures(t); M.image(t, scene, { echantillons: ECH, obturateur: OBT, rayons: RAYONS }); M.attendre(); titres(CALQUE, t); };
 window.__ready = false;
 POLICES_PRETES.then(() => {
   const plateau = document.getElementById("plateau");
