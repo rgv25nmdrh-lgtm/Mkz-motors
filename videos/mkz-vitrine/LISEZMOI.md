@@ -20,7 +20,7 @@ envoyées par MKZ : l'avant, l'arrière, le tableau de bord). La Clio n'est pas 
 |---|---|---|---|
 | 1 | 0 à 2 | « Estimer ma voiture » : on tape sa plaque, AB-123-CD, lettre par lettre ; la voiture est reconnue (Peugeot 208 · 2020 · Diesel) ; très gros plan, le bouton s'enfonce | Votre voiture **mérite une vitrine.** |
 | 2 | 2 à 4 | On file dans un couloir tapissé des photos des voitures ; « Votre estimation » monte et se bloque sur 9 600 € | (le même) |
-| 3 et 4 | 4 à 8 | Six écrans sortent du sol, sur deux gradins ; un gros plan par temps : 01 Estimation (la 208 de profil, la jauge), 02 Photos pro (les vraies photos de la 208 dans le viseur, une par éclair, et leurs vignettes), 03 Annonce en ligne (la fiche de la 208 : 9 600 €, garantie 3 mois ; une demande d'essai arrive), 04 Essais (le trajet sur la carte), 05 Paiement sécurisé (le bouclier, « Virement reçu + 9 600 € »), 06 Démarches (quatre papiers cochés, « Dossier complet ») ; puis tous, de haut | Six étapes, **aucune pour vous.** |
+| 3 et 4 | 4 à 8 | Six écrans sortent du sol, sur deux gradins ; la caméra glisse de l'un à l'autre sans couper, en ralentissant devant chacun, un par temps : 01 Estimation (la 208 de profil, la jauge), 02 Photos pro (les vraies photos de la 208 dans le viseur, une par éclair, et leurs vignettes), 03 Annonce en ligne (la fiche de la 208 : 9 600 €, garantie 3 mois ; une demande d'essai arrive), 04 Essais (le trajet sur la carte), 05 Paiement sécurisé (le bouclier, « Virement reçu + 9 600 € »), 06 Démarches (quatre papiers cochés, « Dossier complet ») ; puis tous, de haut | Six étapes, **aucune pour vous.** |
 | 5 | 8 à 10 | Le mur des vraies voitures de MKZ (les photos de la 208, de la 500X et de la Clio 4, leurs fiches « En vitrine », les écrans des étapes), balayé de près, puis de face ; une plaque tombe : « Et vous ? **Rien** à faire. » | — |
 | 6 | 10 à 12 | Trois plaques tombent en colonne, une par temps : **0** appel à gérer, **0** visite chez vous, **1** virement, c'est tout | — |
 | 7 | 12 à 14 | La scène claire : Déposez → On vend → Vous encaissez ; la pastille rouge descend d'une étape à l'autre, puis s'envole | — |
@@ -41,7 +41,7 @@ que fait vraiment MKZ Motors : « organisé par MKZ » (l'essai), « Vérifié a
 | Fichier | Contenu |
 |---|---|
 | `scene/tex-vitrine.js` | **Tous les textes et les données** : en tête, `PLAQUE`, `MODELE`, `ANNEE`, `PRIX` (la voiture héros), `ETAPES` (les six étiquettes), `VEHICULES` (les fiches du mur), `PHOTOS` (pour chaque photo de `scene/img/`, le centre de la voiture et sa largeur : c'est ce qui la cadre) ; puis chaque dessin : les six écrans animés (`ECRANS`), les fiches, le mur et le couloir (`MUR_ORDRE`, `BANDE_ORDRE`), la barre et la plaque, l'estimation, la plaque du mur, les chiffres, la boucle, le logo, la phrase, l'adresse. |
-| `scene/film.js` | La chorégraphie : les plans, déclarés dans l'ordre par `plan(coupe(instant), …)`, composés pour le vertical ; les titres de la Story (`TITRES`, dessinés sur un calque en pleine définition, sous la barre d'Instagram). |
+| `scene/film.js` | La chorégraphie, composée pour le vertical : une scène par mesure (`scene_(de, a, …)`), filmée par un seul mouvement de caméra continu, sans coupe, passant par des positions clés (`cleCam(instant, position, …)`, une courbe sans à-coup, qui ralentit sur les temps) ; d'une scène à l'autre, un fondu de 0,25 s (`FONDU`) ; les titres de la Story (`TITRES`, dessinés sur un calque en pleine définition, sous la barre d'Instagram). |
 | `scene/cues.js` | Le conducteur : tous les instants sur la grille de la musique, les coups de grosse caisse, la mélodie (`K.motif`, en ré mineur). L'image et la musique le lisent. |
 | `scene/base.js`, `scene/outils.js` | La couleur : `C.accent` (le rouge MKZ, `#fa0f14`) et sa valeur 3D `ORANGE` (nom hérité du kit), à changer ensemble. Le logo : `scene/logo-mkz.png`. |
 | `scene/img/` | Les photos des voitures, verticales, en 900 × 1600. Pour en changer : mêmes noms (ou de nouveaux, déclarés dans `PHOTOS`), puis `scene/dessins.html` pour vérifier le cadrage. |
@@ -61,8 +61,10 @@ avec Pillow (`node tools/verifier.mjs` dit ce qui manque).
     node tools/rendu.mjs video --scene scene/apercu.html --fps 30 --dpr 1 --workers 3 --delai 120 --bitrate 6000000 --out out/apercu-muet.mp4
     bash outils-rendu/rendu-final.sh                         # le rendu final, par tranches de 2 s (voir le script)
 
-Le rendu final sans carte graphique prend environ cinq heures (18 s par image) ; avec une carte graphique, quelques
-minutes. Il se fait par tranches de 2 s : relancer le script reprend là où il s'était arrêté. Deux fichiers sortent :
+Le rendu final sans carte graphique prend environ six heures et demie (25 s par image, 50 min par tranche) ; avec une
+carte graphique, quelques minutes. Il se fait par tranches de 2 s : relancer le script reprend là où il s'était arrêté
+(une tranche interrompue est refaite en entier). Sur une machine cloud qui se met en veille, lancer les tranches une
+par une (la commande `node tools/rendu.mjs video … --from k --to k+2` du script) puis le script pour l'assemblage. Deux fichiers sortent :
 `livrables/mkz-motors-vitrine-1080x1920.mp4` (40 Mbit/s, le fichier maître) et `livrables/mkz-motors-vitrine-leger.mp4`
 (environ 10 Mbit/s, pour la mise en ligne). Ne pas modifier `scene/` pendant un rendu.
 
@@ -71,4 +73,5 @@ minutes. Il se fait par tranches de 2 s : relancer le script reprend là où il 
     node tools/bin/coupes out/mkz-vitrine-muet.mp4 out/ecarts.tsv && python3 tools/controle.py out/ecarts.tsv
     node tools/encode/encode probe livrables/mkz-motors-vitrine-1080x1920.mp4
 
-Les « pics isolés » deux images avant un temps (1,47 s, 1,97 s, 3,97 s…) sont les coupes : c'est voulu.
+Le montage n'a aucune coupe : ni pic isolé dû à un changement de plan, ni image figée. Les seuls sauts de luminosité
+isolés sont des éclairs voulus, posés sur la musique (vers 1,53 s, 3,50 s, 4,00 s, 5,25 s et 8,28 s).
