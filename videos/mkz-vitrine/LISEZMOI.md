@@ -74,4 +74,4 @@ par une (la commande `node tools/rendu.mjs video … --from k --to k+2` du scrip
     node tools/encode/encode probe livrables/mkz-motors-vitrine-1080x1920.mp4
 
 Le montage n'a aucune coupe : ni pic isolé dû à un changement de plan, ni image figée. Les seuls sauts de luminosité
-isolés sont des éclairs voulus, posés sur la musique (vers 1,53 s, 3,50 s, 4,00 s, 5,25 s et 8,28 s).
+isolés sont des éclairs voulus, posés sur la musique (vers 1,53 s, 3,50 s, 4,00 s et 5,25 s).

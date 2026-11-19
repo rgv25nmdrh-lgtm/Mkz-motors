@@ -4,7 +4,7 @@
 // se bloque. 3 et 4 : les six étapes du dépôt-vente, un écran par temps. 5 : le mur des voitures vendues, « Et vous ?
 // Rien à faire. ». 6 : les chiffres (0 appel, 0 visite, 1 virement). 7 : la boucle (Déposez, On vend, Vous encaissez).
 // 8 : le logo MKZ Motors, tenu.
-// Règle du montage : l'ACTION tombe sur le temps, et la coupe la précède de deux images.
+// Règle du montage : l'ACTION tombe sur le temps ; aucune coupe, la caméra glisse d'une action à l'autre et ralentit dessus.
 globalThis.buildCues = function () {
   const T = 0.5, b = (n) => n * T, K = { T, b, DUREE: 16, AV: 2 / 60 };
   // la plaque se tape en doubles croches : A, B, 1, 2, 3, C, D (les tirets se posent seuls)

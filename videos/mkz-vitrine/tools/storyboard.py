@@ -36,7 +36,7 @@ def police(taille, gras=False):
 rangs = sum((len(ps) + COLS - 1) // COLS for _, ps in PARTIES)
 W, H = M + COLS * (L + M), 110 + len(PARTIES) * TIT + rangs * (Hh + LEG + M) + M
 img = Image.new("RGB", (W, H), (17, 17, 21)); d = ImageDraw.Draw(img)
-d.text((M, 26), "MKZ Motors · la vitrine du dépôt-vente · storyboard (Story 9:16, images rendues, 120 battements par minute)", font=police(40, True), fill=(242, 242, 239))
+d.text((M, 26), "MKZ Motors · la vitrine du dépôt-vente · storyboard (Story 9:16, 120 bpm)", font=police(40, True), fill=(242, 242, 239))
 y = 110
 for titre, plans in PARTIES:
     d.text((M, y + 14), titre, font=police(34, True), fill=(250, 40, 45)); y += TIT
