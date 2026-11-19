@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>MKZ Motors : la vitrine, planche des dessins</title>
+  <link rel="stylesheet" href="base.css">
+  <style>body { overflow: auto; } #plateau { display: none; } canvas { display: block; }</style>
+</head>
+<body>
+  <div id="plateau"></div>
+  <script>const SCENE_W = 1080, SCENE_H = 1920, DUREE = 16;</script>
+  <script src="timing.js"></script>
+  <script src="lib.js"></script>
+  <script src="cues.js"></script>
+  <script src="base.js"></script>
+  <script src="tex-vitrine.js"></script>
+  <script src="outils.js"></script>
+  <script>
+    // dessins.html?u=1.5 : les six écrans à u secondes, puis les autres dessins, sur une seule toile
+    const U = +(new URLSearchParams(location.search).get("u") ?? 3.9);
+    POLICES_PRETES.then(() => {
+      const liste = [...[0, 1, 2, 3, 4, 5].map((i) => ["ecran" + i, { k: Math.min(47, Math.round(U * 12)) }]), ["mur"], ["bande"], ["barre", { n: 4, curseur: 1 }], ["barre", { n: 7, ok: 1 }], ["bandeau", { n: 11900, bloque: 1 }],
+        ["barreTitre"], ["reconnue"], ["etiq0"], ["etiq4"], ["rien"], ["chiffre0"], ["chiffre1"], ["chiffre2"], ["etape0"], ["etape2", { actif: 1 }], ["logo"], ["tag"], ["phrase"], ["adresse"], ["bouton"]];
+      const cv = document.createElement("canvas"); cv.width = 3400; cv.height = 5600; document.body.appendChild(cv);
+      const ctx = cv.getContext("2d"); ctx.fillStyle = "#333"; ctx.fillRect(0, 0, cv.width, cv.height);
+      let x = 10, y = 10, hl = 0;
+      for (const [nom, p] of liste) { const T = TEX[nom]; if (x + T.l > cv.width) { x = 10; y += hl + 10; hl = 0; } ctx.save(); ctx.translate(x, y); ctx.fillStyle = "#0d0d0f"; ctx.fillRect(0, 0, T.l, T.h); T.dessiner(ctx, p || {}); ctx.restore(); x += T.l + 10; hl = Math.max(hl, T.h); }
+      window.__ready = true;
+    });
+  </script>
+</body>
+</html>
